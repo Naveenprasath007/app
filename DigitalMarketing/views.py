@@ -4,8 +4,7 @@ from .forms import *
 from .models import TbVideo,Campaignvideo,TbCampaignquestion,Campaignquestionresponse,TbQuestion,TbUserrole,cVideoId,TbStatus,TbUser,TbApprove,video_Details,TbapproverQuestion,Profile
 import pandas as pd
 import json
-
-# 
+#git testing
 import whisper
 
 import uuid
