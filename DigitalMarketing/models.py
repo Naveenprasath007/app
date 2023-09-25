@@ -95,7 +95,8 @@ class TbStatus(models.Model):
     MainReason = models.CharField(db_column='mainreason', max_length=2000,blank=True, null=True)  # Field name made lowercase.
     downloadaccess = models.CharField(db_column='downloadaccess', max_length=255, blank=True, null=True)
     downloader = models.CharField(db_column='downloader', max_length=255, blank=True, null=True)
-    
+    downloadaccesslist = models.CharField(db_column='downloadaccesslist', max_length=255, blank=True, null=True)
+
     class Meta:
         managed = False
         db_table = 'tb_status'

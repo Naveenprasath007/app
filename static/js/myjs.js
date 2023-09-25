@@ -5,6 +5,12 @@
 //     alert('Selected file: ' + name.files.item(0).type);
 //   };
 
+function choosefile() {
+  var element = document.getElementById("accountSection");
+  element.classList.toggle("active");
+}
+
+
 function GetFileSizeNameAndType()
     {
     var fi = document.getElementById('file-upload'); // GET THE FILE INPUT AS VARIABLE.

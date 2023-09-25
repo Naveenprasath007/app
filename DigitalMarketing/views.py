@@ -20,6 +20,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 
 import smtplib
 from email.mime.text import MIMEText
@@ -1358,8 +1359,8 @@ def register_view(request):
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = "AKIAYWUJHWUQRKLDGQKC"
-                smtp_password = "BM0eqFhv1BlczdFWfoJG2GmqUUG0R1lF1SHrDdWessXi"
+                smtp_username = ""
+                smtp_password = ""
                 user_name = user.username
                 send_email_creator(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
                 
@@ -1367,7 +1368,7 @@ def register_view(request):
                 to_email = 'naveen.kumaran@speridian.com'
                 user_Role = Role
                 user_email= user.email
-                # send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
                 subject = "New to our plateform!"
                 to_email = 'pranav.vijay@Truecoverage.com'
@@ -1383,8 +1384,8 @@ def register_view(request):
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = "AKIAYWUJHWUQRKLDGQKC"
-                smtp_password = "BM0eqFhv1BlczdFWfoJG2GmqUUG0R1lF1SHrDdWessXi"
+                smtp_username = ""
+                smtp_password = ""
                 user_name = user.username
                 send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
@@ -1407,8 +1408,8 @@ def register_view(request):
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = "AKIAYWUJHWUQRKLDGQKC"
-                smtp_password = "BM0eqFhv1BlczdFWfoJG2GmqUUG0R1lF1SHrDdWessXi"
+                smtp_username = ""
+                smtp_password = ""
                 user_name = user.username
                 send_email_downloader(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
@@ -1442,52 +1443,89 @@ def register_view(request):
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
-def activate(request):
-    try:
+# def activate(request):
+#     try:
+#         if request.method == "POST":
+#             form = ActivationForm(request.POST or None)
+#             if form.is_valid():
+#                 email= form.cleaned_data.get('email')
+#                 Role = form.cleaned_data.get('Role')
+#                 print(email)
+#                 print(Role)                
+#                 profile=Profile.objects.get(email=email)
+#                 profile.userroleid=Role
+#                 profile.save()
+
+#                 subject = "Digi360 account is activated!"
+#                 message = ""
+#                 from_email = "team.digi360@truecoverage.com"
+#                 to_email = email
+#                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
+#                 smtp_port = 587  # Typically 587 for TLS
+#                 smtp_username = ""
+#                 smtp_password = ""
+#                 user_name = ''
+#                 user_Role = Role
+#                 user_email= email
+
+#                 send_email_activation(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+
+#             context = {
+#                     'form': form,
+#                 }
+#             messages.success(request, 'Account Activated Successfully')
+#             return render(request, "tc_DigitalMarketing/activation.html",context)
+#         else:
+#             form = ActivationForm(request.POST or None)
+#             context = {
+#                     'form': form,
+#                 }
+#             return render(request, "tc_DigitalMarketing/activation.html",context)
+
+#     except Exception as e:
+#         form = ActivationForm(request.POST or None)
+#         context = {
+#                 'form': form,
+#             }
+#         messages.success(request, 'Your Details is not found')
+#         return render(request, "tc_DigitalMarketing/activation.html",context)
+
+
+def activate(request,id):
+    # try:
         if request.method == "POST":
-            form = ActivationForm(request.POST or None)
-            if form.is_valid():
-                email= form.cleaned_data.get('email')
-                Role = form.cleaned_data.get('Role')
-                print(email)
-                print(Role)                
-                profile=Profile.objects.get(email=email)
-                profile.userroleid=Role
-                profile.save()
+            email = request.POST.get('email')
+            status = request.POST.get('status')
+            Role = request.POST.get('Role')
+            print(email)
+            print(status)
+            print(Role)
 
-                subject = "Digi360 account is activated!"
-                message = ""
-                from_email = "team.digi360@truecoverage.com"
-                to_email = email
-                smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-                smtp_port = 587  # Typically 587 for TLS
-                smtp_username = "AKIAYWUJHWUQRKLDGQKC"
-                smtp_password = "BM0eqFhv1BlczdFWfoJG2GmqUUG0R1lF1SHrDdWessXi"
-                user_name = ''
-                user_Role = Role
-                user_email= email
+            if status == 'Deactivate':
+                profilesave=Profile.objects.get(email=email)
+                profilesave.userroleid=''
+                profilesave.save()
+            else:
+                profilesave=Profile.objects.get(email=email)
+                profilesave.userroleid=Role
+                profilesave.save()
 
-                send_email_activation(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-
-            context = {
-                    'form': form,
-                }
-            messages.success(request, 'Account Activated Successfully')
-            return render(request, "tc_DigitalMarketing/activation.html",context)
+            messages.success(request, 'Profile Updated Successfully')
+            return redirect ("/dm/Activation")
+        
+            # profile=Profile.objects.all()
+            # return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile})
         else:
-            form = ActivationForm(request.POST or None)
-            context = {
-                    'form': form,
-                }
-            return render(request, "tc_DigitalMarketing/activation.html",context)
+            profile=Profile.objects.all()
+            return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile,'id':id})
 
-    except Exception as e:
-        form = ActivationForm(request.POST or None)
-        context = {
-                'form': form,
-            }
-        messages.success(request, 'Your Details is not found')
-        return render(request, "tc_DigitalMarketing/activation.html",context)
+    # except Exception as e:
+    #     form = ActivationForm(request.POST or None)
+    #     context = {
+    #             'form': form,
+    #         }
+    #     messages.success(request, 'Your Details is not found')
+    #     return render(request, "tc_DigitalMarketing/activation.html",context)
 
 
 
@@ -1987,15 +2025,16 @@ def superadmindetail_view(request,id):
                 status.downloadaccess='download'
                 status.downloader=listofdownloader
                 status.save()
-            user_status=TbStatus.objects.filter(status='Approved',downloadaccess='Notyet').order_by('-createddate').values()
+            user_status=TbStatus.objects.filter(status='Approved').order_by('-createddate').values()
             # return render(request,'tc_DigitalMarketing/downloadaccesspage.html',{'user_status':user_status,'id':id,})
             messages.success(request, 'Access given succesfully')
             return redirect('/dm/superadmindetail_view/'+id)
         else:
             user=TbUser.objects.filter(userroleid='D1')
-            user_status=TbStatus.objects.filter(status='Approved',downloadaccess='Notyet').order_by('-createddate').values()
+            user_status=TbStatus.objects.filter(status='Approved').order_by('-createddate').values()
             accessed_video='yes'
             return render(request,'tc_DigitalMarketing/downloadaccesspage.html',{'user_status':user_status,'id':id,'user':user,'accessed_video':accessed_video})
+            # return render(request,'tc_DigitalMarketing/downloadaccesspage.html',{'user_status':user_status,'id':id,'user':user,'accessed_video':accessed_video})
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
@@ -2019,6 +2058,7 @@ def superadmindetail_downloader_view(request,id):
             user=TbUser.objects.filter(userroleid='D1')
             for value in user:
                 b=request.POST.get('downloader'+str(value.userid))
+                print(b)
                 listofdownloader.append(b)
             print(listofdownloader)
             listofdownloader=list(filter(None,listofdownloader))
@@ -2051,4 +2091,254 @@ from django.template.defaulttags import register
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)     
+
+@csrf_exempt
+def ajax_file_upload_save(request):
+    print(request.POST)
+    print(request.FILES)
+    fs=FileSystemStorage()
+
+    # print(request.FILES['file1'])
+    # print(request.FILES['file2'])
+    # print(request.FILES['file3'])
+
+
+
+
+
+    # if request.FILES['file1']:
+    file1=request.FILES['file1']
+    file_1_path=fs.save(file1.name.replace(" ", ""),file1)
+    uploaded_file_url = fs.url(file_1_path)
+    print(uploaded_file_url)
+
+    if request.FILES['file2']:
+        file2=request.FILES['file2']
+        file_2_path=fs.save(file2.name.replace(" ", ""),file2)
+        uploaded_file_url1 = fs.url(file_2_path)
+        print(uploaded_file_url1)
+
+    if request.FILES['file3']:
+        file3=request.FILES['file3']
+        file_3_path=fs.save(file3.name.replace(" ", ""),file3)
+        uploaded_file_url2 = fs.url(file_3_path)
+        print(uploaded_file_url2)
+
+
+
+
+    # myfile = request.FILES['myfile']
+    # fs = FileSystemStorage()
+    # filename = fs.save(myfile.name.replace(" ", ""), myfile)
+    # uploaded_file_url = fs.url(filename)
+    return HttpResponse("Uploaded")
+
+# def daccess(request):
+#     if request.method == "POST":
+            
+#             id="c8294fff-4ae9-41be-b914-6569105e83e6"
+#             status= TbStatus.objects.get(videoid=id)
+#             downloader_list=(status.downloader)
+#             downloader_rm_list=(status.downloadaccessremove)
+#             import ast
+#             downloader_list = ast.literal_eval(downloader_list)
+#             downloader_rm_list = ast.literal_eval(downloader_rm_list)
+
+#             downloaders_add = request.POST.getlist('topics[]')
+#             downloaders_remove = request.POST.getlist('top[]')
+#             print(downloaders_add)
+#             print()
+#             status.downloader=downloaders_remove
+#             status.downloadaccessremove=downloaders_add
+#             status.save()
+
+#             return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list ,"b_list":downloader_rm_list})
+
+
+#             return redirect('/dm/daccess')
+
+
+
+
+# # waiting for review
+#             # user=TbUser.objects.filter(userroleid='D1')
+#             # downloader=[]
+#             # for i in user:
+#             #     downloader.append(i.username)
+
+#             # id="d9e56a8d-1c64-4ed1-aaec-e63a2382ffe7"
+#             # status= TbStatus.objects.get(videoid=id)
+#             # b=(status.downloader)
+#             # import ast
+#             # res = ast.literal_eval(b)
+#             # testb = res
+#             # type(testb)
+#             # b = res
+#             # print(b)
+#             # a=downloader
+#             # remove_common(a, b)
+#             # # for value in user:
+#             # #     b=request.POST.get('downloader'+str(value.userid))
+#             # #     listofdownloader.append(b)
+#             # # print(listofdownloader)
+
+#             # downloaders_add = request.POST.getlist('topics[]')
+#             # downloaders_remove = request.POST.getlist('top[]')
+#             # # remove_common1(downloaders_add,downloaders_remove)
+
+
+#             # remove=common_member(downloaders_remove,b)
+#             # print(remove)
+#             # list3 = a + remove
+#             # print(list3)
+
+
+#             # print("downloader_add:",downloaders_add)
+#             # print("downloader_remove:",downloaders_remove)
+#             # id="d9e56a8d-1c64-4ed1-aaec-e63a2382ffe7"
+#             # status= TbStatus.objects.get(videoid=id)
+#             # status.downloadaccess='download'
+#             # status.downloader=list3
+#             # status.downloadaccessremove=remove
+#             # status.save()
+#             # return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_rm_list ,"b_list":downloader_list})
+
+#     else:
+#         downloaders=TbUser.objects.filter(userroleid='D1')
+#         print(downloaders)
+#         downloader=[]
+#         for i in downloaders:
+#             downloader.append(i.username)
+#         id="c8294fff-4ae9-41be-b914-6569105e83e6"
+#         status= TbStatus.objects.get(videoid=id)
+#         print(downloader)
+#         if status.downloader ==None or status.downloader =='[]':
+#             print(downloader)
+#             status.downloader=downloader
+#             status.downloadaccessremove='[]'
+#             status.save() #[A1,A2,A3]
+
+#         downloader_list=(status.downloader)
+#         downloader_rm_list=(status.downloadaccessremove)
+#         import ast
+#         downloader_list = ast.literal_eval(downloader_list)
+#         downloader_rm_list = ast.literal_eval(downloader_rm_list)
+        
+#         return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list ,"b_list":downloader_rm_list})
+
+    # return render (request,'tc_DigitalMarketing/daccess.html',{'user':user,"a_list": list3,"b_list": testb,})
+
+def remove_common(a, b):
+ 
+    for i in a[:]:
+        if i in b:
+            # a.remove(i)
+            b.remove(i)
+
+def remove_common1(a1, b1):
+        for i in a1[:]:
+            if i in b1:
+                # a1.remove(i)
+                b1.remove(i)
+
+def daccess(request,id):
+
+        if request.method == "POST":
+            rest = request.POST.getlist('reset')
+            save = request.POST.getlist('save')
+            down_list = request.POST.getlist('top[]')
+            downaccess_list = request.POST.getlist('topics[]')
+            print(save)
+            print(rest)
+            print('downaccess_list',downaccess_list)
+            print('downloader_list',down_list)
+
+            # id="3c2271e1-d10f-4680-b86c-8b62f41b7594"
+            downloader=[]
+            downloaders=TbUser.objects.filter(userroleid='D1')
+            for i in downloaders:
+                downloader.append(i.username)
+            downloaderstatus= TbStatus.objects.get(videoid=id)
+
+            if downloaderstatus.downloader ==None or downloaderstatus.downloader ==[]:
+                downloaderstatus.downloader=downloader
+                downloaderstatus.save() 
+
+            import ast
+            if downloaderstatus.downloader !=None or downloaderstatus.downloader ==[]:
+                downloader=(downloaderstatus.downloader)
+                downloader_list = ast.literal_eval(downloader)
+                # print(downloader_list)
+            else:
+                downloader_list=[]
+
+            if downloaderstatus.downloadaccesslist !=None or downloaderstatus.downloader ==[]: 
+                downloaderaccess=(downloaderstatus.downloadaccesslist)
+                downloaderaccess_list = ast.literal_eval(downloaderaccess)
+                # print(downloaderaccess_list)
+            else:
+                downloaderaccess_list=[]
+
+            a=downaccess_list
+            b=downloader_list
+            remove_common(a, b)
+            # print(a)
+            # print(b)
+
+
+            if str(down_list) == '[]':
+                downloaderstatus.downloader=b
+                downloaderstatus.downloadaccesslist=a+downloaderaccess_list
+                downloaderstatus.downloadaccess='download'
+                downloaderstatus.save() 
+
+
+
+            #TILL THIS WORKING FINE
+
+
+            if str(downaccess_list) =='[]':
+                a1=down_list+downloader_list
+                b1=downloaderaccess_list
+                remove_common1(a1, b1)
+                print(a1)
+                print(b1)
+
+                downloaderstatus.downloader=down_list+downloader_list
+                downloaderstatus.downloadaccesslist=b1
+                downloaderstatus.save() 
+
+            return redirect ('/dm/daccess/'+id)
+
+
+        else:
+
+            downloader=[]
+            downloaders=TbUser.objects.filter(userroleid='D1')
+            for i in downloaders:
+                downloader.append(i.username)
+            downloaderstatus= TbStatus.objects.get(videoid=id)
+
+            if downloaderstatus.downloader ==None:
+                downloaderstatus.downloader=downloader
+                downloaderstatus.save() 
+                return redirect ('/dm/daccess/'+id)
+
+            import ast
+            if downloaderstatus.downloader !=None or str(downloaderstatus.downloader) =='[]':
+                downloader=(downloaderstatus.downloader)
+                downloader_list = ast.literal_eval(downloader)
+                print(downloader_list)
+            else:
+                downloader_list=[]
+
+            if downloaderstatus.downloadaccesslist !=None or str(downloaderstatus.downloader) =='[]': 
+                downloaderaccess=(downloaderstatus.downloadaccesslist)
+                downloaderaccess_list = ast.literal_eval(downloaderaccess)
+                print(downloaderaccess_list)
+            else:
+                downloaderaccess_list=[]
+
+            return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list,"b_list":downloaderaccess_list })
+
 
