@@ -1511,7 +1511,7 @@ def activate(request,id):
                 profilesave.save()
 
             messages.success(request, 'Profile Updated Successfully')
-            return redirect ("/dm/Activation")
+            return redirect ("/dm/Activation/"+id)
         
             # profile=Profile.objects.all()
             # return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile})
