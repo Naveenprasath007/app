@@ -70,7 +70,7 @@
         <div class="overflow-auto" style="max-width:100%; max-height:45vh"> 
 
         <div class="main-creative-box">
-            {% if Creative == 'Video' %}
+            <!-- {% if Creative == 'Video' %}
             {% if video1 == '--' %}
             <video width="50%" height="200" controls="">
                 <source src="{{video}}" type="video/mp4">
@@ -170,7 +170,109 @@
               </div>
             </div>
             {% endif %}
+            {% endif %} -->
+
+            {% if Creative == 'Video' %}
+            {% if url1 == '--' %}
+            <video width="50%" height="200" controls="">
+                <source src="{{url}}" type="video/mp4">
+            Your browser does not support the video tag.
+            </video>
             {% endif %}
+
+            {% if url1 != '--' and url2 == '--' %}
+            <div class="container">
+              <div class="row">
+                <div class="col-sm">
+                  <div class="videos-box">          
+                    <div class="thumbnail">
+                      <video width="500" height="150" controls>
+                        <source src="{{ url }}" type="video/mp4">
+                        <source src="{{ url }}" type="video/ogg">
+                      Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <p class="video-title"></p>
+                  </div> 
+                </div>
+
+                <div class="col-sm">
+                  <div class="videos-box">          
+                    <div class="thumbnail">
+                      <video width="500" height="150" controls>
+                        <source src="{{ url1 }}" type="video/mp4">
+                        <source src="{{ url1 }}" type="video/ogg">
+                      Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <p class="video-title"></p>
+                  </div> 
+                </div>
+
+              </div>
+            </div>
+            {% endif %}
+
+            {% if url1 != '--' and url2 != '--' %}
+            <div class="container">
+              <div class="row">
+                <div class="col-sm">
+                  <div class="videos-box">          
+                    <div class="thumbnail">
+                      <video width="500" height="150" controls>
+                        <source src="{{ url }}" type="video/mp4">
+                        <source src="{{ url }}" type="video/ogg">
+                      Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <p class="video-title"></p>
+                  </div> 
+                </div>
+
+                <div class="col-sm">
+                  <div class="videos-box">          
+                    <div class="thumbnail">
+                      <video width="500" height="150" controls>
+                        <source src="{{ url1 }}" type="video/mp4">
+                        <source src="{{ url1 }}" type="video/ogg">
+                      Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <p class="video-title"></p>
+                  </div> 
+                </div>
+
+                <div class="col-sm">
+                  <div class="videos-box">          
+                    <div class="thumbnail">
+                      <video width="500" height="150" controls>
+                        <source src="{{ url2 }}" type="video/mp4">
+                        <source src="{{ url2 }}" type="video/ogg">
+                      Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <p class="video-title"></p>
+                  </div> 
+                </div>
+
+
+              </div>
+            </div>
+            {% endif %}
+            {% endif %}
+  
+            {%if Creative == 'Image' %}
+            <div class="upload-box">
+              <img width="100%" height="100%" src="{{ imgurl }}" alt="">
+            </div>
+            {% endif %}
+  
+            {%if Creative == 'Gif' %}
+            <div class="upload-box">
+              <img width="100%" height="100%" src="{{ gifurl }}" alt="">
+            </div>
+            {% endif %}
+            
 
         <div class="videotitle">
           <div class="titlebox">
@@ -260,11 +362,11 @@
         <textarea class="form-control" id="default" name="cmdtranscript" rows="5">{{Transcribe}}</textarea>
       </div>
       {% endif %}
-      {%if Transcribe1 != '--'%}
+      <!-- {%if Transcribe1 != '--'%}
       <div class="mb-3">
       <textarea class="form-control" id="default" name="cmdtranscript1" rows="5">{{Transcribe1}}</textarea>
       </div>
-      {% endif %}
+      {% endif %} -->
       </div>
     </div>
 
