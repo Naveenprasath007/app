@@ -108,14 +108,14 @@
         <div class="upload-panel mbottom">
           <div class="upwrap">
             {% if creative == 'Video' %}
-            {% if url == '--' %}
+            {% if url != '--' and url1 == '--' and url2 == '--' %}
             <video width="50%" height="200" controls="">
                 <source src="{{url}}" type="video/mp4">
             Your browser does not support the video tag.
             </video>
             {% endif %}
 
-            {% if url1 != '--' and url2 == '--' %}
+            {% if url != '--' and url1 != '--' and url2 == '--' %}
             <div class="container">
               <div class="row">
                 <div class="col-sm">
@@ -148,7 +148,7 @@
             </div>
             {% endif %}
 
-            {% if url1 != '--' and url2 != '--' %}
+            {% if url != '--' and url1 != '--' and url2 != '--' %}
             <div class="container">
               <div class="row">
                 <div class="col-sm">
@@ -218,6 +218,7 @@
               <h5>
                 Browse or import <span>Video,Image,Gif</span>
               </h5>
+              <br>
               <div class="platform-box">
               <label>
               <input class='Videoupload' type="radio" data-bs-toggle="modal" data-bs-target="#exampleModalCenter"  name="creative" value="Video" onchange="chooseupload1()" required>
@@ -246,6 +247,7 @@
             </fieldset>
             </h5>
             </div>
+            <p>You will free to upload any file format upto 300 mb</p>
           </div>
           {% endif %}
           </div>
@@ -294,13 +296,13 @@
                 <div class="platform-box" style="background-color: #c9e8f9">
                   <input type="checkbox" name="Platform" id="cdn" value="GDN"/>
                   <label for="cdn" >
-                    <img src="{% static './images/cdn.png'%}" style="border-radius: 0px; padding: 0px;" />
+                    <img src="{% static './images/cdn.png'%}" />
                  </label> 
                 </div>
                 <div class="platform-box" style="background-color: #d8d5d5">
-                  <input type="checkbox" name="Platform" id="" value="tiktok"/>
+                  <input type="checkbox" name="Platform" id="tiktok" value="tiktok"/>
                   <label for="tiktok">
-                    <img src="{% static './images/tiktok.svg'%}"  style="border-radius: 0px; padding: 0px;"/>
+                    <img src="{% static './images/tiktok.svg'%}" />
                  </label> 
                 </div>
                 <div class="platform-box" style="background-color: #2fab7c">
@@ -346,7 +348,22 @@
 
         </div>
         </form>
-
+        {%if getdetails %}
+        <div class="transcription-panel mbottom">
+          <h2>Transcription</h2>
+          <div class="transcription-box">
+            <p>Transcription will be generated once video uploaded.</p>
+          </div>
+        </div>
+        {% endif %}
+        {%if text %}
+        <div class="transcription-panel mbottom">
+          <h2>Transcription</h2>
+          <div class="transcription-box">
+            <p>{{ text }}</p>
+          </div>
+        </div>
+        {% endif %}
         
   
         <!-- <div class="transcription-panel mbottom">

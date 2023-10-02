@@ -330,7 +330,7 @@ def creater_upload(request,id):
                     return redirect('/dm/superadmin/'+id)
                 
             return render(request,'tc_DigitalMarketing/upload-pagenew.html',{"k":id,'userrolename':userrolename,'id':id,                                                                                    'qT':questionsText,
-                                                                                    'qR':QuestionResponse,
+                                                                                    'qR':QuestionResponse,'text':text,
                                                                                     "data":data,'dataQ':dataQ,
                                                                              'creative':Creative,'finalsubmit':finalsubmit,
                                                                              'url':url,'url1':url1,'url2':url2,'imgurl':image_url,'gifurl':Gif_url})

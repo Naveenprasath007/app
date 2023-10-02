@@ -67,7 +67,7 @@
 
      <div class="aprove-panel">
      <div class="creative-panel">
-        <div class="overflow-auto" style="max-width:100%; max-height:45vh"> 
+        <!-- <div class="overflow-auto" style="max-width:100%; max-height:45vh">  -->
 
         <div class="main-creative-box">
             <!-- {% if Creative == 'Video' %}
@@ -263,13 +263,13 @@
   
             {%if Creative == 'Image' %}
             <div class="upload-box">
-              <img width="100%" height="100%" src="{{ imgurl }}" alt="">
+              <img width="100%" height="100%" src="{{ imgUrl }}" alt="">
             </div>
             {% endif %}
   
             {%if Creative == 'Gif' %}
             <div class="upload-box">
-              <img width="100%" height="100%" src="{{ gifurl }}" alt="">
+              <img width="100%" height="100%" src="{{ gifUrl }}" alt="">
             </div>
             {% endif %}
             
@@ -352,7 +352,7 @@
         </div> -->
         <!-- This can be help for sperate div -->
       </div>
-    </div>
+    <!-- </div> -->
 
     <form action="" method="post">
       {% csrf_token %}  
@@ -384,7 +384,7 @@
           {% endif %}
           {% if qR.k0 %}
           <div class="ap-box">
-          <input text="" placeholder="Youtubr" value="{{R.0.1}}" readonly>
+          <input text="" placeholder="" value="{{R.0.1}}" readonly>
           </div>
           {% endif %}
 
