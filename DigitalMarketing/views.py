@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.db import connection
 import os
 from datetime import datetime
-
+import ast
 #login
 from django.contrib.auth import authenticate,get_user_model,login,logout
 from django.contrib.auth.decorators import login_required
@@ -28,7 +28,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from django.template.loader import render_to_string
 
-
+from dotenv import load_dotenv
+load_dotenv()
 
 @login_required(login_url='/')
 def uploaderdashboard(request,id):
@@ -1584,12 +1585,12 @@ def register_view(request):
             if Role == 'Creator':
                 subject = "Welcome Creative Management!"
                 message = ""
-                from_email = "team.digi360@truecoverage.com"
+                from_email = "support.digi360@truecoverage.com"
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = ""
-                smtp_password = ""
+                smtp_username = os.getenv('SMTP_Username')
+                smtp_password = os.getenv('SMTP_Password')
                 user_name = user.username
                 send_email_creator(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
                 
@@ -1603,18 +1604,18 @@ def register_view(request):
                 to_email = 'pranav.vijay@Truecoverage.com'
                 user_Role = Role
                 user_email= user.email
-                # send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
 
             if Role == 'Approver':
                 subject = "Welcome Creative Management!"
                 message = ""
-                from_email = "team.digi360@truecoverage.com"
+                from_email = "support.digi360@truecoverage.com"
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = ""
-                smtp_password = ""
+                smtp_username = os.getenv('SMTP_Username')
+                smtp_password = os.getenv('SMTP_Password')
                 user_name = user.username
                 send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
@@ -1631,14 +1632,24 @@ def register_view(request):
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
             
             if Role == 'Downloader':
+                #adding download list in status table
+                queryset = TbStatus.objects.all() 
+                for q in queryset:
+                    a=q.downloader 
+                    downloader_list = ast.literal_eval(a)
+                    downloader_list.append(user.username)
+                    print(a)
+                    q.downloader = downloader_list
+                    q.save()
+
                 subject = "Welcome Creative Management!"
                 message = ""
                 from_email = "team.digi360@truecoverage.com"
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
-                smtp_username = ""
-                smtp_password = ""
+                smtp_username = os.getenv('SMTP_Username')
+                smtp_password = os.getenv('SMTP_Password')
                 user_name = user.username
                 send_email_downloader(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
@@ -1653,7 +1664,9 @@ def register_view(request):
                 user_Role = Role
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-            
+
+
+
 
             new_user = authenticate(username=user.username, password=password,)
             login(request, new_user)
@@ -2521,7 +2534,6 @@ def daccess(request,id):
                 downloaderstatus.downloader=downloader
                 downloaderstatus.save() 
 
-            import ast
             if downloaderstatus.downloader !=None or downloaderstatus.downloader ==[]:
                 downloader=(downloaderstatus.downloader)
                 downloader_list = ast.literal_eval(downloader)
@@ -2541,6 +2553,10 @@ def daccess(request,id):
             remove_common(a, b)
             # print(a)
             # print(b)
+            approver = TbApprove.objects.get(videoid=id)
+            approver.downloadaccess='download'
+            approver.downloader=b
+            approver.save()
 
 
             if str(down_list) == '[]':
@@ -2548,6 +2564,12 @@ def daccess(request,id):
                 downloaderstatus.downloadaccesslist=a+downloaderaccess_list
                 downloaderstatus.downloadaccess='download'
                 downloaderstatus.save() 
+
+                approver = TbApprove.objects.get(videoid=id)
+                approver.downloadaccess='download'
+                approver.downloader=a+downloaderaccess_list
+                approver.save()
+
 
 
 
@@ -2565,6 +2587,11 @@ def daccess(request,id):
                 downloaderstatus.downloadaccesslist=b1
                 downloaderstatus.save() 
 
+                approver = TbApprove.objects.get(videoid=id)
+                approver.downloadaccess='download'
+                approver.downloader=b1
+                approver.save()
+
             return redirect ('/dm/daccess/'+id)
 
 
@@ -2576,20 +2603,19 @@ def daccess(request,id):
                 downloader.append(i.username)
             downloaderstatus= TbStatus.objects.get(videoid=id)
 
-            if downloaderstatus.downloader ==None:
+            if downloaderstatus.downloader == None:
                 downloaderstatus.downloader=downloader
                 downloaderstatus.save() 
                 return redirect ('/dm/daccess/'+id)
 
-            import ast
-            if downloaderstatus.downloader !=None or str(downloaderstatus.downloader) =='[]':
+            if downloaderstatus.downloader != None or str(downloaderstatus.downloader) =='[]':
                 downloader=(downloaderstatus.downloader)
                 downloader_list = ast.literal_eval(downloader)
                 print(downloader_list)
             else:
                 downloader_list=[]
 
-            if downloaderstatus.downloadaccesslist !=None or str(downloaderstatus.downloader) =='[]': 
+            if downloaderstatus.downloadaccesslist != None or str(downloaderstatus.downloader) == '[]': 
                 downloaderaccess=(downloaderstatus.downloadaccesslist)
                 downloaderaccess_list = ast.literal_eval(downloaderaccess)
                 print(downloaderaccess_list)

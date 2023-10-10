@@ -101,7 +101,37 @@
     select{
       width: 20em;
     }
+    /* Loading Process */
+    #loading {
+        position: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0.9;
+        background-color: #fff;
+        z-index: 99;
+        }
+        
+    #loading-image {
+    z-index: 100;
+    }
+
     </style>
+    <div id="loading" style="display: none;">
+      <img id="loading-image" src="{% static 'images/Hourglass.gif'%}" alt="Loading..." />
+
+      <!-- <h3>Please Wait Until This Process Is Completed</h3> -->
+      <div>
+        <br>
+        <h6>Video Transcribe Initialized...</h6>
+        <h6>Please Wait Until This Process Is Completed</h6>
+      </div>
+  
+    </div>
   <form method="post" enctype="multipart/form-data" >
     {% csrf_token %}
     <div class="upload-page">
@@ -313,7 +343,7 @@
               </div>
             </div>
   
-            <button class="submit" name='Upload' value="Upload" onclick="validateForm()">Submit</button>
+            <button class="submit" name='Upload' value="Upload" onclick="validateForm()" >Submit</button>
           </div>
           {% endif %}
 
@@ -576,11 +606,18 @@
                     alert("Please select at least one platform.")
                     return false
                 }
+                $("#loading").show();
            
             
         }
     }
 </script>
+<script type="text/javascript">// <![CDATA[
+  function loading(){
+      $("#loading").show();
+      // $("#content").hide();       
+  }
+// ]]></script>
     
 
 {% endblock content %}
