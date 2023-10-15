@@ -126,7 +126,8 @@ def myvideos(request,id):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
- 
+
+@csrf_exempt
 def uploadfile(request,id):
             
         if request.method == "POST":
