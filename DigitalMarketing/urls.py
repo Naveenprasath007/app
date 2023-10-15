@@ -23,7 +23,6 @@ urlpatterns = [
     path("uploaderdashboard/<str:id>", views.uploaderdashboard),
     path("filterpage/<str:id>/<str:id1>/<str:id2>", views.filterpage),
     path("myvideos/<str:id>", views.myvideos),
-    path("createrupload/<str:id>", views.creater_upload),
     path("UserIndexpage", views.user_indexpage),
     path("approver/<str:id>", views.approver),
     path("approverview/<str:id>/<str:uid>", views.approver_view),
@@ -44,6 +43,9 @@ urlpatterns = [
     path("ajax_file_upload_save/<str:id>",views.ajax_file_upload_save),
     path("daccess/<str:id>",views.daccess),
     
+    
+    path("uploadfile/<str:id>",views.uploadfile), 
+    path("createrupload/<str:id>/<str:fname>/<str:type>/<str:vid>", views.creater_upload),    
 
      
 
