@@ -1410,13 +1410,13 @@ def register_view(request):
                 send_email_creator(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
                 
                 subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@speridian.com'
+                to_email = 'naveen.kumaran@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
                 subject = "New to our plateform!"
-                to_email = 'pranav.vijay@Truecoverage.com'
+                to_email = 'pranav.vijay@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
@@ -1435,13 +1435,13 @@ def register_view(request):
                 send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
                 subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@speridian.com'
+                to_email = 'naveen.kumaran@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
                 subject = "New to our plateform!"
-                to_email = 'pranav.vijay@Truecoverage.com'
+                to_email = 'naveen.kumaran@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
@@ -1461,7 +1461,7 @@ def register_view(request):
 
                 subject = "Welcome Creative Management!"
                 message = ""
-                from_email = "team.digi360@truecoverage.com"
+                from_email = "support.digi360@truecoverage.com"
                 to_email = user.email
                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
                 smtp_port = 587  # Typically 587 for TLS
@@ -1471,13 +1471,13 @@ def register_view(request):
                 send_email_downloader(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
                 subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@speridian.com'
+                to_email = 'naveen.kumaran@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
                 subject = "New to our plateform!"
-                to_email = 'pranav.vijay@Truecoverage.com'
+                to_email = 'pranav.vijay@truecoverage.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
