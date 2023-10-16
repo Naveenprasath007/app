@@ -1451,11 +1451,13 @@ def register_view(request):
                 queryset = TbStatus.objects.all() 
                 for q in queryset:
                     a=q.downloader 
-                    downloader_list = ast.literal_eval(a)
-                    downloader_list.append(user.username)
                     print(a)
-                    q.downloader = downloader_list
-                    q.save()
+                    if a != None:
+                        downloader_list = ast.literal_eval(a)
+                        downloader_list.append(user.username)
+                        print(a)
+                        q.downloader = downloader_list
+                        q.save()
 
                 subject = "Welcome Creative Management!"
                 message = ""
