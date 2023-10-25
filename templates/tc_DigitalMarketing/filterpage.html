@@ -107,6 +107,25 @@
       <tbody>
         <tr align="center" class="finding">
           <td>
+            <!-- <div>
+              {{i.videoPath}}
+            </div>
+            
+            <div id="light">
+              {{i.videoPath}}
+              <a class="boxclose" id="boxclose" onclick="lightbox_close();"></a>
+              <video id="VisaChipCardVideo" width="600" controls>
+                  <source src="{{i.videoPath}}" type="video/mp4">
+                  <source src="{{i.videoPath}}" type="video/ogg">
+                </video>
+            </div>
+            
+            <div id="fade" onClick="lightbox_close();"></div>
+            
+            <div>
+              <a href="#" onclick="lightbox_open();"><img width="200" height="50" src="{% static 'images/tc.png'%}"></a>
+            </div> -->
+
             <video width="30" height="50" poster="{% static 'images/tc.png'%}"  controls="">
               <source src="{{i.videoPath}}" type="video/mp4">
               <source src="{{i.videoPath}}" type="video/ogg">
@@ -517,7 +536,31 @@
 </div>
 
 
+<script>
+  window.document.onkeydown = function(e) {
+  if (!e) {
+    e = event;
+  }
+  if (e.keyCode == 27) {
+    lightbox_close();
+  }
+}
 
+function lightbox_open() {
+  var lightBoxVideo = document.getElementById("VisaChipCardVideo");
+  window.scrollTo(0, 0);
+  document.getElementById('light').style.display = 'block';
+  document.getElementById('fade').style.display = 'block';
+  lightBoxVideo.play();
+}
+
+function lightbox_close() {
+  var lightBoxVideo = document.getElementById("VisaChipCardVideo");
+  document.getElementById('light').style.display = 'none';
+  document.getElementById('fade').style.display = 'none';
+  lightBoxVideo.pause();
+}
+</script>
 
 
 
