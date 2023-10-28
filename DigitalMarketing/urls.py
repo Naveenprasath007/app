@@ -45,7 +45,8 @@ urlpatterns = [
     
     
     path("uploadfile/<str:id>",views.uploadfile), 
-    path("createrupload/<str:id>/<str:fname>/<str:type>/<str:vid>", views.creater_upload),    
+    path("createrupload/<str:id>/<str:fname>/<str:type>/<str:vid>", views.creater_upload),   
+    path("account/<str:id>", views.account),  
 
      
 

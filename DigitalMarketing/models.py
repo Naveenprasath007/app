@@ -174,7 +174,7 @@ class Profile(models.Model):
     userroleid = models.CharField(db_column='UserRoleId', blank=True,max_length=255)  # Field name made lowercase.
     vendor=models.CharField(db_column='Vendor', max_length=255, blank=True, null=True)
     email = models.CharField(db_column='email', blank=True,max_length=255)
-
+    profile_pic = models.ImageField(default = "\media\Profile\Default.jpg",null=True, blank=True)
 
     
 

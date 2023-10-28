@@ -39,13 +39,13 @@
                 <a class="nav-link" href="#">
                   <span>My Account</span>
                   <span class="av-holder">
-                    <img src="{% static 'images/avatar.png'%}" alt="" />
+                    <img src={{userdetails.profile_pic}} alt="" />
                     <i class="bi bi-chevron-down"></i>
                   </span>
                 </a>
                 <div class="dropdown-panel">
                   <ul>
-                      <li>Account</li>
+                    <a style="text-decoration: none;color: inherit;" href="/dm/account/{{ id }}" rel="noopener noreferrer"><li >Account</li> </a>
                       <a style="text-decoration: none;color: inherit;" href="{% url 'logout'%}" rel="noopener noreferrer"><li>Logout</li></a>
                   </ul>
                 </div>
@@ -170,27 +170,12 @@
                                     <h4>Creator<a class="show" href="#">Show All </a></h4>
                                  </div>
                                  <div class="av-list d-flex justify-content-between">
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_5.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_5.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_5.png' %}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png' %}" alt=""> 
-                                        </a>
+                                    {% for i in creators %}
+                                    <a href="/dm/account/{{i.userid}}">
+                                        <img src={{i.profile_pic}} alt="" style="border-radius: 50%;"> 
+                                    </a>
+                                    {% endfor %}
+
                                  </div>
                             </div>
                         </div>

@@ -16,6 +16,7 @@ import ast
 #login
 from django.contrib.auth import authenticate,get_user_model,login,logout
 from django.contrib.auth.decorators import login_required
+import pathlib
 
 
 from django.conf import settings
@@ -30,6 +31,11 @@ from django.template.loader import render_to_string
 
 from dotenv import load_dotenv
 load_dotenv()
+
+from datetime import date
+today = date.today()
+today=today.strftime("%b_%d_%Y")
+
 
 @login_required(login_url='/')
 def uploaderdashboard(request,id):
@@ -74,9 +80,12 @@ def uploaderdashboard(request,id):
         file_type_counts.columns = ['File_Type', 'Count']
         File_Type=file_type_counts['File_Type'].values.tolist()
         File_TypeC=file_type_counts['Count'].values.tolist()
+        userdetails=Profile.objects.get(userid = id)
+        admin_approver = Profile.objects.filter(userroleid='S1') | Profile.objects.filter(userroleid='R1') 
+        
         return render(request,'tc_DigitalMarketing/dash_index.html',{'id':id,'status':status,'Approved':Approved,'Rejected':Rejected,'Pending':Pending,'UserName':UN,
                                                                      'DateValue':DateValue,"videoC":videoC,'upload_img_gif_count':upload_img_gif_count,'File_Type':File_Type,
-                                                                     'File_TypeC':File_TypeC,'recent':recent,
+                                                                     'File_TypeC':File_TypeC,'recent':recent,'admin_approver':admin_approver,'userdetails':userdetails
                                                                      })
     except Exception as e:
         error={'error':e}
@@ -109,10 +118,11 @@ def filterpage(request,id,id1,id2):
         userrolename=TbUserrole.objects.get(userroleid = userroleid)
         userrolename=userrolename.userrolename
         print(userrolename)
-
+        userdetails=Profile.objects.get(userid = id)
         return render(request,'tc_DigitalMarketing/filterpage.html',{'id':id,'status':status,
                                                                      'user_status':user_status
-                                                                     ,'userrolename':userrolename})
+                                                                     ,'userrolename':userrolename,
+                                                                     'userdetails':userdetails})
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
@@ -122,24 +132,50 @@ def myvideos(request,id):
         if request.method == "POST":
              return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id})
         videodetails=video_Details.objects.filter(userid=id)
-        return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id,'videodetails':videodetails})
+        userdetails=Profile.objects.get(userid = id)
+        return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id,'videodetails':videodetails,
+                                                                   'userdetails':userdetails})
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 @csrf_exempt
 def uploadfile(request,id):
-            
         if request.method == "POST":
+            folder='media/'+str(today)+'/' 
             type=request.POST.get('creative')
             myfile = request.FILES['fileToUpload']
-            fs = FileSystemStorage()
-            filename = fs.save(myfile.name.replace(" ", ""), myfile)
-            url = fs.url(filename)
+            fs = FileSystemStorage(location=folder)
+
+            file_ext = fs.url(myfile)
+
+            allowed_file_types = {
+            'Video': ('.mp4', '.ogg', '.mov'),  
+            'Image': ('.jpg', '.jpeg', '.png'), 
+            'Gif': ('.gif',),
+            }
+            file_extension = pathlib.Path(file_ext).suffix.lower()
+            if file_extension not in allowed_file_types.get(type, ()):
+                messages.warning(request, 'Invalid file type for the selected creative type')
+                return redirect('/dm/uploadfile/'+ id)
+
+            file = fs.save(myfile.name.replace(" ", ""), myfile)
+            url = fs.url(file)
+            filename=myfile
             VID = uuid.uuid4()
             VID=str(VID)
-            print(type)
-            return redirect('/dm/createrupload/'+id+'/'+filename+'/'+type+'/'+VID)
+
+
+            # file_extension = pathlib.Path(file1).suffix.lower()
+            
+
+            # if file_extension not in allowed_file_types.get(type, ()):
+            #     messages.warning(request, 'Invalid file type for the selected creative type')
+            #     return redirect('/dm/uploadfile/'+ id)
+            
+        
+            return redirect('/dm/createrupload/'+id+'/'+str(filename)+'/'+type+'/'+VID)
+
 
         else:
             a=id
@@ -152,11 +188,12 @@ def uploadfile(request,id):
             getdetails="yes"
             uploadfile='yes'
             uploadform='yes'
+            userdetails=Profile.objects.get(userid = id)
 
 
             return render(request,'tc_DigitalMarketing/upload-page.html',{'k':a,'userrolename':userrolename,
                                                                              'id':id,'Uploadfile':uploadfile,
-                                                                             'uploadform':uploadform})
+                                                                             'uploadform':uploadform,'userdetails':userdetails})
 
 
 
@@ -173,6 +210,7 @@ def creater_upload(request,id,fname,type,vid):
             Title=request.POST.get('title')
             question = request.POST.getlist('question')
             Qlist=list(filter(None,question))
+            folder='/media/'+str(today)+'/' 
 
             print(vid)
             fname=str(fname)
@@ -181,8 +219,7 @@ def creater_upload(request,id,fname,type,vid):
 
             if upload == "Upload":
                     if type == 'Image':
-                        fs = FileSystemStorage()
-                        image_url = fs.url(fname)
+                        image_url = folder+fname
                         Gif_url = '--'
                         video_url = '--'
 
@@ -243,8 +280,7 @@ def creater_upload(request,id,fname,type,vid):
                             return redirect('/dm/superadmin/'+id)
 
                     elif type == 'Gif':
-                        fs = FileSystemStorage()
-                        Gif_url = fs.url(fname)
+                        Gif_url = folder+fname
                         image_url = '--'
                         video_url = '--'
 
@@ -305,11 +341,11 @@ def creater_upload(request,id,fname,type,vid):
                             return redirect('/dm/superadmin/'+id)
 
 
-                    elif type == 'Video':
-                        fs = FileSystemStorage()
-                        video_url = fs.url(fname)
+                    elif type == 'Video':                        
+                        video_url =folder+fname
                         image_url = '--'
                         Gif_url = '--'
+                        print(video_url)
                         # tbvideo = TbVideo.objects.get(videoid=VID)
                         # tbvideo.videoname='download'
                         # tbvideo.videotranscription=text
@@ -403,10 +439,9 @@ def creater_upload(request,id,fname,type,vid):
 
             elif upload =='transcribe':
                     try:
-                        fs = FileSystemStorage()
-                        video_path = fs.url(fname)
                         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                        file_path = BASE_DIR+video_path
+                        folder='/media/'+str(today)+'/' 
+                        file_path=BASE_DIR+folder+fname
                         print(file_path)
 
                         model = whisper.load_model("tiny")
@@ -425,6 +460,14 @@ def creater_upload(request,id,fname,type,vid):
 
                     except Exception as e:
                         text="The transcription of this video is not supported."
+                        username=Profile.objects.get(userid = id)
+                        urid = username.userroleid
+                        user=TbUser.objects.get(userid=id)
+                        UN=user.username
+                        userrolename=TbUserrole.objects.get(userroleid = urid)
+                        userrolename=userrolename.userrolename
+                        print(userrolename)
+                        finalsubmit='yes'
                     print(text)
                     return render(request,'tc_DigitalMarketing/upload-page.html',{"k":id,'userrolename':userrolename,'id':id,
                                                                                 'finalsubmit':finalsubmit,'fname':fname,'text':text})
@@ -442,14 +485,14 @@ def creater_upload(request,id,fname,type,vid):
                 ascpect2=request.POST.get('ascpect2')
                 if ascpect1:
                     video_url = request.FILES['file2']
-                    fs = FileSystemStorage()
+                    fs = FileSystemStorage(location=folder)
                     filename = fs.save(video_url.name.replace(" ", ""), video_url)
                     video_url1 = fs.url(filename)
                 else:
                     video_url1='--'
                 if ascpect2:
                     video_url = request.FILES['file3']
-                    fs = FileSystemStorage()
+                    fs = FileSystemStorage(location=folder)
                     filename = fs.save(video_url.name.replace(" ", ""), video_url)
                     video_url2 = fs.url(filename)
                 else:
@@ -535,6 +578,7 @@ def creater_upload(request,id,fname,type,vid):
             #                                                                  'url':url,'url1':url1,'url2':url2,'imgurl':image_url,'gifurl':Gif_url})
 
         else:
+            folder='/media/'+str(today)+'/' 
             a=id
             username=Profile.objects.get(userid = id)
             userroleid = username.userroleid
@@ -542,14 +586,15 @@ def creater_upload(request,id,fname,type,vid):
             userrolename=userrolename.userrolename
             submitform="yes"
             uploadform="yes"
-            fs = FileSystemStorage()
-            url = fs.url(fname)
+            url=folder+fname
+            print(url)
+            userdetails=Profile.objects.get(userid = id)
 
 
             return render(request,'tc_DigitalMarketing/upload-page.html',{'k':a,'userrolename':userrolename,
                                                                                 'id':id,'submitform':submitform,
                                                                                 'creative':type,'url':url
-                                                                                ,'uploadform':uploadform})
+                                                                                ,'uploadform':uploadform,"userdetails":userdetails})
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
@@ -667,9 +712,10 @@ def approver(request,id):
                     file_type_counts.columns = ['File_Type', 'Count']
                     File_Type=file_type_counts['File_Type'].values.tolist()
                     File_TypeC=file_type_counts['Count'].values.tolist()
+                    creators = Profile.objects.filter(userroleid='U1')
                     return render(request,'tc_DigitalMarketing/approver_index.html',{'status':status,'id':id,'status':status,'id':id,'Approved':Approved,'Rejected':Rejected,
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
-                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent})
+                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,'creators':creators})
                     # return redirect('/dm/createrupload/'+str(val))
                 # filter1 =df["status"].isin(['Pending'])
                 # Pending = df[filter1]
@@ -708,12 +754,13 @@ def approver(request,id):
                 File_TypeC=file_type_counts['Count'].values.tolist()
                 print(File_Type)
                 print(File_TypeC)
+                creators = Profile.objects.filter(userroleid='U1')
 
                 # return render(request,'tc_DigitalMarketing/approver.html',{'status':status,'id':id})
                 return render(request,'tc_DigitalMarketing/approver_index.html',{'status':status,'id':id,'Approved':Approved,'Rejected':Rejected,
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
                                                                                 'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,
-                                                                                'upload_img_gif_count':upload_img_gif_count})
+                                                                                'upload_img_gif_count':upload_img_gif_count,'creators':creators})
             except:
                 return redirect('/dm/createrupload/'+str(val))
 
@@ -724,12 +771,12 @@ def approver(request,id):
 
 @login_required(login_url='/')
 def admin(request,id):
-    try:
+    # try:
         if request.method == "POST":
             return render(request,'tc_DigitalMarketing/admin_index.html')
         else:
             #this try catch i need to modify 
-            try:
+            # try:
                 userName=connection.cursor()
                 userName.execute("select UserName from tb_User where UserID='{val}';".format(val=id))
                 userName=userName.fetchall()
@@ -768,9 +815,13 @@ def admin(request,id):
                     file_type_counts.columns = ['File_Type', 'Count']
                     File_Type=file_type_counts['File_Type'].values.tolist()
                     File_TypeC=file_type_counts['Count'].values.tolist()
+                    
+                    userdetails=Profile.objects.get(userid = id)
+                    creators = Profile.objects.filter(userroleid='U1')
+
                     return render(request,'tc_DigitalMarketing/admin_index.html',{'status':status,'id':id,'status':status,'id':id,'Approved':Approved,'Rejected':Rejected,
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
-                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent})
+                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,'userdetails':userdetails,'creators':creators})
                     # return redirect('/dm/createrupload/'+str(val))
                 # filter1 =df["status"].isin(['Pending'])
                 # Pending = df[filter1]
@@ -806,17 +857,21 @@ def admin(request,id):
                 file_type_counts.columns = ['File_Type', 'Count']
                 File_Type=file_type_counts['File_Type'].values.tolist()
                 File_TypeC=file_type_counts['Count'].values.tolist()
+                
+                userdetails=Profile.objects.get(userid = id)
+                creators = Profile.objects.filter(userroleid='U1')
 
                 # return render(request,'tc_DigitalMarketing/approver.html',{'status':status,'id':id})
                 return render(request,'tc_DigitalMarketing/admin_index.html',{'status':status,'id':id,'Approved':Approved,'Rejected':Rejected,
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
-                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent})
-            except:
-                return redirect('/dm/Activation/'+str(id))
+                                                                                'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,'userdetails':userdetails,
+                                                                                'creators':creators})
+            # except:
+            #     return redirect('/dm/Activation/'+str(id))
 
-    except Exception as e:
-        error={'error':e}
-        return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    # except Exception as e:
+    #     error={'error':e}
+    #     return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 
 @login_required(login_url='/')
@@ -1101,6 +1156,7 @@ def approver_view(request,id,uid):
             userrolename=TbUserrole.objects.get(userroleid = userroleid)
             userrolename=userrolename.userrolename
             print(userrolename)
+            userdetails=Profile.objects.get(userid = uid)
 
             return render(request,'tc_DigitalMarketing/approverviewnew.html',{'qT':questionsText,
                                                                               'qR':QuestionResponse,
@@ -1119,7 +1175,7 @@ def approver_view(request,id,uid):
                                                                               'Questions':Question,
                                                                               'imgUrl':imgUrl,
                                                                               'gifUrl':gifUrl,
-                                                                              'userrolename':userrolename})
+                                                                              'userrolename':userrolename,"userdetails":userdetails})
     # except Exception as e:
     #     error={'error':e}
     #     return render(request,'tc_DigitalMarketing/error.html',context=error)  
@@ -1169,6 +1225,7 @@ def status_view(request,id1,uid):
             print(userroleid)
             userrolename=TbUserrole.objects.get(userroleid = userroleid)
             userrolename=userrolename.userrolename
+            userdetails=Profile.objects.get(userid = uid)
             return render(request,'tc_DigitalMarketing/statusview.html',{'approverres':res[0],
                                                                         'approvercmd':res[1],
                                                                         'reason':res[2],
@@ -1186,7 +1243,7 @@ def status_view(request,id1,uid):
                                                                         'uploadername':response[0][1],
                                                                         'imgUrl':imgUrl,
                                                                         "gifUrl":gifUrl,
-
+                                                                        'userdetails':userdetails,
                                                                         'userrolename':userrolename,
                                                                         })
     except Exception as e:
@@ -1419,35 +1476,50 @@ def upload_again(request,id,id1):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
-    
+
+def account(request,id):
+    if request.method == "POST":
+        folder='media/Profile/' 
+        picture = request.FILES['profilepic']
+        fs = FileSystemStorage(location=folder)
+        filename = fs.save(picture.name.replace(" ", ""), picture)
+        uploaded_file_url = '/'+folder+filename
+        print(uploaded_file_url)
+        profile=Profile.objects.get(userid = id)   
+        profile.profile_pic=uploaded_file_url
+        profile.save()
+
+
+    profile=Profile.objects.get(userid = id)   
+    return render(request,'tc_DigitalMarketing/account.html',{'context':profile})  
 
 def login_view(request):
     try:
-        next = request.GET.get('next')
-        print(next)
+        # next = request.GET.get('next')
+        # print(next)
         form = UserLoginForm(request.POST or None)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             login(request, user)
-            if next:
+            # if next:
             #customized redirect i need to check this
             #     return redirect(next)
-                if user.profile.userroleid == "U1":
+                # if user.profile.userroleid == "U1":
                         
-                        return redirect('/dm/uploaderdashboard/'+str(user.profile.userid)) 
-                if user.profile.userroleid == "R1":
+                #         return redirect('/dm/uploaderdashboard/'+str(user.profile.userid)) 
+                # if user.profile.userroleid == "R1":
 
-                        return redirect('/dm/approver/'+str(user.profile.userid))   
+                #         return redirect('/dm/approver/'+str(user.profile.userid))   
                         
-                if user.profile.userroleid == "S1":
+                # if user.profile.userroleid == "S1":
 
-                        return redirect('/dm/superadmin/'+str(user.profile.userid))  
+                #         return redirect('/dm/superadmin/'+str(user.profile.userid))  
                 
-                if user.profile.userroleid == "D1": 
+                # if user.profile.userroleid == "D1": 
                 
-                        return redirect('/dm/superadmin/'+str(user.profile.userid)) 
+                #         return redirect('/dm/superadmin/'+str(user.profile.userid)) 
             if user.profile.userroleid == "U1":
                 
                 return redirect('/dm/uploaderdashboard/'+str(user.profile.userid)) 
@@ -1484,6 +1556,7 @@ def register_view(request):
             user.set_password(password)
             Role = form.cleaned_data.get('Role')
             Name = form.cleaned_data.get('Name')
+            
             user.save()
 
             if Role == 'Creator':
@@ -1545,17 +1618,17 @@ def register_view(request):
                 user_name = user.username
                 send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
-                subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                # subject = "New to our plateform!"
+                # to_email = 'naveen.kumaran@truecoverage.com'
+                # user_Role = Role
+                # user_email= user.email
+                # send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
-                subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                # subject = "New to our plateform!"
+                # to_email = 'naveen.kumaran@truecoverage.com'
+                # user_Role = Role
+                # user_email= user.email
+                # send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
             
             if Role == 'Downloader':
                 #adding download list in status table
@@ -1687,7 +1760,8 @@ def activate(request,id):
             # return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile})
         else:
             profile=Profile.objects.all()
-            return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile,'id':id})
+            userdetails=Profile.objects.get(userid = id)
+            return render(request, "tc_DigitalMarketing/activation.html",{"profile":profile,'id':id,"userdetails":userdetails})
 
     # except Exception as e:
     #     form = ActivationForm(request.POST or None)
@@ -2119,6 +2193,8 @@ def update_view(request,id,id1):
             print(vP)
             print(vP1)
             print(Creative)
+            userdetails=Profile.objects.get(userid = id)
+
 
 
 
@@ -2135,7 +2211,8 @@ def update_view(request,id,id1):
                                                                         'Creative':Creative,
                                                                         'Platform':Platform,
                                                                         'imgUrl':imgUrl,
-                                                                        "gifUrl":gifUrl,                                                                     
+                                                                        "gifUrl":gifUrl, 
+                                                                        'userdetails':userdetails,                                                                    
                                                                      })
     except Exception as e:
         error={'error':e}
