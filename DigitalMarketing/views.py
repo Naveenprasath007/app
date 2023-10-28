@@ -1618,17 +1618,17 @@ def register_view(request):
                 user_name = user.username
                 send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
 
-                # subject = "New to our plateform!"
-                # to_email = 'naveen.kumaran@truecoverage.com'
-                # user_Role = Role
-                # user_email= user.email
-                # send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                subject = "New to our plateform!"
+                to_email = 'naveen.kumaran@truecoverage.com'
+                user_Role = Role
+                user_email= user.email
+                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
-                # subject = "New to our plateform!"
-                # to_email = 'naveen.kumaran@truecoverage.com'
-                # user_Role = Role
-                # user_email= user.email
-                # send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                subject = "New to our plateform!"
+                to_email = 'pranav.vijay@truecoverage.com'
+                user_Role = Role
+                user_email= user.email
+                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
             
             if Role == 'Downloader':
                 #adding download list in status table
