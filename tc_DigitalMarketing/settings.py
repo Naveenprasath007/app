@@ -33,7 +33,7 @@ DEBUG = True
 
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ['http://18.189.26.152:8000/','https://digi360.truecoverage.com']
+CSRF_TRUSTED_ORIGINS = ['http://18.219.45.124:8000/','https://digi360.truecoverage.com']
 
 
 
