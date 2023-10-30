@@ -172,30 +172,13 @@
                                 <div class="my-heads">
                                     <h4>Creator<a class="show" href="#">Show All </a></h4>
                                  </div>
-                                 <div class="av-list d-flex justify-content-between">
+                                 <div class="av-list d-flex">
                                     {% for i in creators %}
                                     <a href="/dm/account/{{i.userid}}">
                                         <img src={{i.profile_pic}} alt="" style="border-radius: 50%;"> 
                                     </a>
                                     {% endfor %}
-                                        <!-- <a href="#">
-                                            <img src="{% static 'images/av_5.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_5.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png'%}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_5.png' %}" alt=""> 
-                                        </a>
-                                        <a href="#">
-                                            <img src="{% static 'images/av_1.png' %}" alt=""> 
-                                        </a> -->
+
                                  </div>
                             </div>
                         </div>
