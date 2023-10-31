@@ -1605,6 +1605,12 @@ def register_view(request):
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
+                subject = "New to our plateform!"
+                to_email = 'sainath.guddemmagari@speridian.com'
+                user_Role = Role
+                user_email= user.email
+                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+            
 
             if Role == 'Approver':
                 subject = "Welcome Creative Management!"
@@ -1626,6 +1632,12 @@ def register_view(request):
 
                 subject = "New to our plateform!"
                 to_email = 'pranav.vijay@truecoverage.com'
+                user_Role = Role
+                user_email= user.email
+                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+            
+                subject = "New to our plateform!"
+                to_email = 'sainath.guddemmagari@speridian.com'
                 user_Role = Role
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
@@ -1666,7 +1678,12 @@ def register_view(request):
                 user_email= user.email
                 send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
 
-
+                subject = "New to our plateform!"
+                to_email = 'sainath.guddemmagari@speridian.com'
+                user_Role = Role
+                user_email= user.email
+                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+            
 
 
             new_user = authenticate(username=user.username, password=password,)
