@@ -4,35 +4,28 @@ from .forms import *
 from .models import TbVideo,Campaignvideo,TbCampaignquestion,Campaignquestionresponse,TbQuestion,TbUserrole,cVideoId,TbStatus,TbUser,TbApprove,video_Details,TbapproverQuestion,Profile
 import pandas as pd
 import json
-#git testing
 import whisper
-
 import uuid
 from django.contrib import messages
 from django.db import connection
 import os
 from datetime import datetime
 import ast
-#login
+from django.template.defaulttags import register
 from django.contrib.auth import authenticate,get_user_model,login,logout
 from django.contrib.auth.decorators import login_required
 import pathlib
-
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 from django.template.loader import render_to_string
-
-from dotenv import load_dotenv
-load_dotenv()
-
 from datetime import date
+
+
 today = date.today()
 today=today.strftime("%b_%d_%Y")
 
@@ -90,6 +83,7 @@ def uploaderdashboard(request,id):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    
 @login_required(login_url='/')
 def filterpage(request,id,id1,id2):
     try:
@@ -126,6 +120,7 @@ def filterpage(request,id,id1,id2):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    
 @login_required(login_url='/')
 def myvideos(request,id):
     try:
@@ -139,7 +134,7 @@ def myvideos(request,id):
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
-@csrf_exempt
+@login_required(login_url='/')
 def uploadfile(request,id):
         if request.method == "POST":
             folder='media/'+str(today)+'/' 
@@ -164,19 +159,7 @@ def uploadfile(request,id):
             filename=myfile
             VID = uuid.uuid4()
             VID=str(VID)
-
-
-            # file_extension = pathlib.Path(file1).suffix.lower()
-            
-
-            # if file_extension not in allowed_file_types.get(type, ()):
-            #     messages.warning(request, 'Invalid file type for the selected creative type')
-            #     return redirect('/dm/uploadfile/'+ id)
-            
-        
             return redirect('/dm/createrupload/'+id+'/'+str(filename)+'/'+type+'/'+VID)
-
-
         else:
             a=id
             username=Profile.objects.get(userid = id)
@@ -189,8 +172,6 @@ def uploadfile(request,id):
             uploadfile='yes'
             uploadform='yes'
             userdetails=Profile.objects.get(userid = id)
-
-
             return render(request,'tc_DigitalMarketing/upload-page.html',{'k':a,'userrolename':userrolename,
                                                                              'id':id,'Uploadfile':uploadfile,
                                                                              'uploadform':uploadform,'userdetails':userdetails})
@@ -473,28 +454,24 @@ def creater_upload(request,id,fname,type,vid):
                                                                                 'finalsubmit':finalsubmit,'fname':fname,'text':text})
 
 
-                    # except Exception as e:
-                    #     return "The transcription of this video is not supported."
-
-
-
             else:
+                folder='media/'+str(today)+'/' 
                 text=request.POST.get('text')
                 switch=request.POST.get('switch')
                 ascpect1=request.POST.get('ascpect1')
                 ascpect2=request.POST.get('ascpect2')
                 if ascpect1:
-                    video_url = request.FILES['file2']
-                    fs = FileSystemStorage(location=folder)
-                    filename = fs.save(video_url.name.replace(" ", ""), video_url)
-                    video_url1 = fs.url(filename)
+                    myfile = request.FILES['file2']
+                    fs = FileSystemStorage(location=folder) #defaults to   MEDIA_ROOT  
+                    filename = fs.save(myfile.name.replace(" ", ""), myfile)
+                    video_url1="/"+folder+str(filename)
                 else:
                     video_url1='--'
                 if ascpect2:
-                    video_url = request.FILES['file3']
-                    fs = FileSystemStorage(location=folder)
-                    filename = fs.save(video_url.name.replace(" ", ""), video_url)
-                    video_url2 = fs.url(filename)
+                    myfile = request.FILES['file3']
+                    fs = FileSystemStorage(location=folder) #defaults to   MEDIA_ROOT  
+                    filename = fs.save(myfile.name.replace(" ", ""), myfile)
+                    video_url2="/"+folder+str(filename)
                 else:
                     video_url2='--'
 
@@ -505,14 +482,6 @@ def creater_upload(request,id,fname,type,vid):
                 else: 
                     ans='no'
                 
-                # VID = cVideoId.objects.all().order_by('-id').first()
-                # VID=str(VID)
-                # video=TbVideo.objects.get(videoid = VID)
-                # Title=video.videoname
-                # imageurl=video.Imageurl
-                # gifurl=video.Gifurl
-
-
                 tbvideo = TbVideo.objects.get(videoid=VID)
                 tbvideo.videotranscription=text
                 tbvideo.videopath1=video_url1
@@ -522,13 +491,7 @@ def creater_upload(request,id,fname,type,vid):
                 status = TbStatus.objects.get(videoid=VID)
                 status.videoPath1=video_url1
                 status.videoPath2=video_url2
-                status.save()
-
-
-
-                # video_details5 = Campaignquestionresponse(campaignquestionid=TbCampaignquestion.objects.get(campaignquestionid = a),
-                #                         userid=TbUser.objects.get(userid = str(id)),response= ans)
-                # video_details5.save()  
+                status.save() 
 
                 username=Profile.objects.get(userid = id)
                 urid = username.userroleid
@@ -539,27 +502,6 @@ def creater_upload(request,id,fname,type,vid):
                 userrolename=userrolename.userrolename
                 print(userrolename)
 
-                # status = TbStatus(userid=TbUser.objects.get(userid=id),videoid=VID,status='Pending',videoname=Title,approver='---',uploadername=UN,platform=Platform,Imageurl=imageurl,Gifurl=gifurl,creative=Creative)
-                # status.save()
-
-                # cQresponse=TbCampaignquestion.objects.filter(campaignvideoid=VID)
-                # print(cQresponse)
-                # lenOfList=len(cQresponse)
-                # listOfcQresponse=[]
-                # for i in cQresponse:
-                #     output=i.campaignquestionid
-                #     listOfcQresponse.append(output)
-                # print(listOfcQresponse)
-                # import itertools
-
-                # for (a, b) in itertools.zip_longest(listOfcQresponse,Qlist):
-                #         video_details5 = Campaignquestionresponse(campaignquestionid=TbCampaignquestion.objects.get(campaignquestionid = a),
-                #                                 userid=TbUser.objects.get(userid = str(id)),response= b)
-                #         video_details5.save()  
-
-
-                # videoDetails = video_Details(userid=TbUser.objects.get(userid=id),VideoPath=vP,VideoName=Title,creative=Creative)
-                # videoDetails.save()
 
                 if userrolename=='Uploader':
                     messages.success(request, 'submitted succesfully')
@@ -571,12 +513,6 @@ def creater_upload(request,id,fname,type,vid):
                     messages.success(request, 'submitted succesfully')
                     return redirect('/dm/superadmin/'+id)
                 
-            # return render(request,'tc_DigitalMarketing/upload-pagenew.html',{"k":id,'userrolename':userrolename,'id':id,                                                                                    'qT':questionsText,
-            #                                                                  'qR':QuestionResponse,'text':text,
-            #                                                                  "data":data,'dataQ':dataQ,
-            #                                                                  'creative':Creative,'finalsubmit':finalsubmit,
-            #                                                                  'url':url,'url1':url1,'url2':url2,'imgurl':image_url,'gifurl':Gif_url})
-
         else:
             folder='/media/'+str(today)+'/' 
             a=id
@@ -599,21 +535,8 @@ def creater_upload(request,id,fname,type,vid):
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
-  
-
-    
+      
 def transcribe_video_audio(video_path):
-    # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    # file_path = BASE_DIR+video_path
-    # model = whisper.load_model("tiny")
-    # audio_dir = os.path.dirname(file_path)
-    # print(audio_dir)
-    # audio_path = os.path.join(audio_dir, "audio.wav")
-    # command = f'ffmpeg -i "{file_path}" -vn -acodec pcm_s16le -ar 16000 -ac 1 "{audio_path}"'
-    # os.system(command)
-    # result = model.transcribe(audio_path)
-    # os.remove(audio_path)
-    # return result["text"]
     try:
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         file_path = BASE_DIR+video_path
@@ -629,39 +552,6 @@ def unique_numbers(numbers):
     # this will take only unique numbers from the tuple
     return tuple(set(numbers))
 
-# THIS is no needed Rechecking is pending
-def user_indexpage(request):
-    try:
-        if request.method == 'POST':
-            userName = request.POST.get('username')
-            Password = request.POST.get('pass')
-            data = TbUser.objects.filter(username=userName,password=Password).values()
-            for i in data:
-                print(i)
-                a=i
-            if data:
-                value=a.get('userroleid_id')
-                print(value)
-                if value == "U1":
-                    val=a.get('userid')
-                    
-                    return redirect('/dm/uploaderdashboard/'+str(val)) 
-                if value == "R1":
-                    val=a.get('userid')
-                    
-                    return redirect('/dm/approver/'+str(val))
-                
-                if value == "S1":
-                    val=a.get('userid')
-                    
-                    return redirect('/dm/approver/'+str(val))
-            messages.error(request, 'Invalid! userName or password')
-            return redirect('/dm/UserIndexpage')    
-        else:
-            return render(request, 'tc_DigitalMarketing/UserindexPage.html')
-    except Exception as e:
-        error={'error':e}
-        return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 @login_required(login_url='/')
 def approver(request,id):
@@ -1582,66 +1472,45 @@ def register_view(request):
             tbuser.save()
     
             if Role == 'Creator':
-                subject = "Welcome Creative Management!"
-                message = ""
-                from_email = "support.digi360@truecoverage.com"
-                to_email = user.email
-                smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-                smtp_port = 587  # Typically 587 for TLS
-                smtp_username = os.getenv('SMTP_Username')
-                smtp_password = os.getenv('SMTP_Password')
-                user_name = user.username
-                send_email_creator(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
-                
-                subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                email_from = settings.DEFAULT_FROM_EMAIL
+                recipient = [user.email,]
+                html = render_to_string('email\creator.html', {
+                    'user_name': user.username,
+                    'user_email': user.email,
+                })
+                send_mail('Welcome to Creative Management!', 'This is the message', email_from, recipient, html_message=html)
+                print("messsage sent")
 
-                subject = "New to our plateform!"
-                to_email = 'pranav.vijay@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-
-                subject = "New to our plateform!"
-                to_email = 'sainath.guddemmagari@speridian.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-            
+                # mail send to admin 
+                recipient = ['sainath.guddemmagari@speridian.com','pranav.vijay@truecoverage.com','naveen.kumaran@truecoverage.com',]
+                html = render_to_string('email\default.html', {
+                    'user_name': user.username,
+                    'user_email': user.email,
+                    'user_Role' : Role,
+                })
+                send_mail('New to our plateform!', 'This is the message', email_from, recipient, html_message=html)
+                print("default messsage sent")
 
             if Role == 'Approver':
-                subject = "Welcome Creative Management!"
-                message = ""
-                from_email = "support.digi360@truecoverage.com"
-                to_email = user.email
-                smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-                smtp_port = 587  # Typically 587 for TLS
-                smtp_username = os.getenv('SMTP_Username')
-                smtp_password = os.getenv('SMTP_Password')
-                user_name = user.username
-                send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
+                email_from = settings.DEFAULT_FROM_EMAIL
+                recipient = [user.email,]
+                html = render_to_string('email\approver.html', {
+                    'user_name': user.username,
+                    'user_email': user.email,
+                })
+                send_mail('Welcome to Creative Management!', 'This is the message', email_from, recipient, html_message=html)
+                print("messsage sent")
 
-                subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
+                # mail sendto admin 
+                recipient = ['sainath.guddemmagari@speridian.com','pranav.vijay@truecoverage.com','naveen.kumaran@truecoverage.com',]
+                html = render_to_string('email\default.html', {
+                    'user_name': user.username,
+                    'user_email': user.email,
+                    'user_Role' : Role,
+                })
+                send_mail('New to our plateform!', 'This is the message', email_from, recipient, html_message=html)
+                print("default messsage sent")
 
-                subject = "New to our plateform!"
-                to_email = 'pranav.vijay@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-            
-                subject = "New to our plateform!"
-                to_email = 'sainath.guddemmagari@speridian.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-            
             if Role == 'Downloader':
                 #adding download list in status table
                 queryset = TbStatus.objects.all() 
@@ -1655,36 +1524,23 @@ def register_view(request):
                         q.downloader = downloader_list
                         q.save()
 
-                subject = "Welcome Creative Management!"
-                message = ""
-                from_email = "support.digi360@truecoverage.com"
-                to_email = user.email
-                smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-                smtp_port = 587  # Typically 587 for TLS
-                smtp_username = os.getenv('SMTP_Username')
-                smtp_password = os.getenv('SMTP_Password')
-                user_name = user.username
-                send_email_downloader(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name)
+                email_from = settings.DEFAULT_FROM_EMAIL
+                recipient = [user.email,]
+                html = render_to_string('email\downloader.html', {
+                    'user_name': user.username,
+                    'email': user.email,
+                })
+                send_mail('Welcome to Creative Management!', 'This is the message', email_from, recipient, html_message=html)
+                print("messsage sent")
 
-                subject = "New to our plateform!"
-                to_email = 'naveen.kumaran@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-
-                subject = "New to our plateform!"
-                to_email = 'pranav.vijay@truecoverage.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-
-                subject = "New to our plateform!"
-                to_email = 'sainath.guddemmagari@speridian.com'
-                user_Role = Role
-                user_email= user.email
-                send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-            
-
+                recipient = ['sainath.guddemmagari@speridian.com','pranav.vijay@truecoverage.com','naveen.kumaran@truecoverage.com',]
+                html = render_to_string('email\default.html', {
+                    'user_name': user.username,
+                    'user_email': user.email,
+                    'user_Role' : Role,
+                })
+                send_mail('New to our plateform!', 'This is the message', email_from, recipient, html_message=html)
+                print("default messsage sent")
 
             new_user = authenticate(username=user.username, password=password,)
             login(request, new_user)
@@ -1702,53 +1558,6 @@ def register_view(request):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
-
-# def activate(request):
-#     try:
-#         if request.method == "POST":
-#             form = ActivationForm(request.POST or None)
-#             if form.is_valid():
-#                 email= form.cleaned_data.get('email')
-#                 Role = form.cleaned_data.get('Role')
-#                 print(email)
-#                 print(Role)                
-#                 profile=Profile.objects.get(email=email)
-#                 profile.userroleid=Role
-#                 profile.save()
-
-#                 subject = "Digi360 account is activated!"
-#                 message = ""
-#                 from_email = "team.digi360@truecoverage.com"
-#                 to_email = email
-#                 smtp_server = "email-smtp.ap-south-1.amazonaws.com"
-#                 smtp_port = 587  # Typically 587 for TLS
-#                 smtp_username = ""
-#                 smtp_password = ""
-#                 user_name = ''
-#                 user_Role = Role
-#                 user_email= email
-
-#                 send_email_activation(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email)
-
-#             context = {
-#                     'form': form,
-#                 }
-#             messages.success(request, 'Account Activated Successfully')
-#             return render(request, "tc_DigitalMarketing/activation.html",context)
-#         else:
-#             form = ActivationForm(request.POST or None)
-#             context = {
-#                     'form': form,
-#                 }
-#             return render(request, "tc_DigitalMarketing/activation.html",context)
-
-#     except Exception as e:
-#         form = ActivationForm(request.POST or None)
-#         context = {
-#                 'form': form,
-#             }
-#         messages.success(request, 'Your Details is not found')
-#         return render(request, "tc_DigitalMarketing/activation.html",context)
 
 
 def activate(request,id):
@@ -1770,6 +1579,12 @@ def activate(request,id):
                 profilesave.userroleid=Role
                 profilesave.save()
 
+                email_from = settings.DEFAULT_FROM_EMAIL
+                recipient = [email,]
+                html = render_to_string('email/activation.html')
+                send_mail('Your Account Activated!', 'This is the message', email_from, recipient, html_message=html)
+                print("messsage sent")
+
             messages.success(request, 'Profile Updated Successfully')
             return redirect ("/dm/Activation/"+id)
         
@@ -1787,141 +1602,6 @@ def activate(request,id):
     #         }
     #     messages.success(request, 'Your Details is not found')
     #     return render(request, "tc_DigitalMarketing/activation.html",context)
-
-
-
-def send_email_creator(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name):
-   
-    html_message = render_to_string('email/creator.html', {'user_name': user_name})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
-
-def send_email_approver(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name):
-   
-    html_message = render_to_string('email/approver.html', {'user_name': user_name})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
-
-def send_email_downloader(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name):
-   
-    html_message = render_to_string('email/downloader.html', {'user_name': user_name})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
-
-def send_email_default(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email):
-
-    html_message = render_to_string('email/default.html', {'user_name': user_name,'user_Role':user_Role,'user_email':user_email})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
-
-def send_email_default1(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email):
-
-    html_message = render_to_string('email/default.html', {'user_name': user_name,'user_Role':user_Role,'user_email':user_email,})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
-
-def send_email_activation(subject, message, from_email, to_email, smtp_server, smtp_port, smtp_username, smtp_password,user_name,user_Role,user_email):
-
-    html_message = render_to_string('email/activation.html', {'user_name': user_name,'user_Role':user_Role,'user_email':user_email})
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-    
-    part1 = MIMEText(html_message, 'html')
-    msg.attach(part1)
-
-    try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Secure the connection
-        server.login(smtp_username, smtp_password)
-        server.sendmail(from_email, to_email, msg.as_string())
-        server.quit()
-        print("Email sent successfully.")
-    except Exception as e:
-        print("Error sending email:", e)
 
 
 def logout_view(request):
@@ -2189,12 +1869,6 @@ def update_view(request,id,id1):
             return render(request,'tc_DigitalMarketing/createrupload.html')
         else:
             status=TbStatus.objects.filter(videoid=id1)
-
-            # cursor1=connection.cursor()
-            # cursor1.execute("select VideoPath,VideoName from CampaignVideo cv inner join tb_Video v on v.VideoID=cv.VideoID AND cv.CampaignVideoID='{val}'".format(val=id1))
-            # VideoDeatails=cursor1.fetchall()
-            # vP='/'+VideoDeatails[0][0]
-            # vName=VideoDeatails[0][1]
             video=TbVideo.objects.get(videoid = id1)
             vP=video.videopath
             vT=video.videotranscription
@@ -2211,11 +1885,6 @@ def update_view(request,id,id1):
             print(vP1)
             print(Creative)
             userdetails=Profile.objects.get(userid = id)
-
-
-
-
-
             return render(request,'tc_DigitalMarketing/update.html',{
                                                                         'id':id,
                                                                         'url':vP,
@@ -2350,192 +2019,9 @@ def superadmindetail_downloader_view(request,id):
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
-from django.template.defaulttags import register
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)     
-
-@csrf_exempt
-def ajax_file_upload_save(request,id):
-    print(request.POST)
-    print(request.FILES)
-    fs=FileSystemStorage()
-
-
-
-    try:
-        # if request.FILES['file1']:
-        if request.FILES['file1']:
-            file1=request.FILES['file1']
-            file_1_path=fs.save(file1.name.replace(" ", ""),file1)
-            uploaded_file_url = fs.url(file_1_path)
-            print(uploaded_file_url)
-
-        if request.FILES['file2']:
-            file2=request.FILES['file2']
-            file_2_path=fs.save(file2.name.replace(" ", ""),file2)
-            uploaded_file_url1 = fs.url(file_2_path)
-            print(uploaded_file_url1)
-
-        if request.FILES['file3']:
-            file3=request.FILES['file3']
-            file_3_path=fs.save(file3.name.replace(" ", ""),file3)
-            uploaded_file_url2 = fs.url(file_3_path)
-            print(uploaded_file_url2)
-
-        new_id = uuid.uuid4()
-        str(new_id)
-        print(str(new_id))
-
-        video_id = cVideoId(VideoID=new_id,userID = id)
-        video_id.save()
-
-        video_details2 = TbVideo(videoid=new_id,videopath=uploaded_file_url,
-        previousvideoid=0,videopath1=uploaded_file_url1,videopath2=uploaded_file_url2,
-        )
-        video_details2.save()
-    except:
-
-        new_id = uuid.uuid4()
-        str(new_id)
-        print(str(new_id))
-
-        video_id = cVideoId(VideoID=new_id,userID = id)
-        video_id.save()
-        
-        try:
-            if request.FILES['file1']:
-                video_details2 = TbVideo(videoid=new_id,videopath=uploaded_file_url,
-                previousvideoid=0,videopath1='--',videopath2='--',
-                )
-                video_details2.save()
-            if request.FILES['file2']:
-                video_details2 = TbVideo(videoid=new_id,videopath=uploaded_file_url,
-                previousvideoid=0,videopath1=uploaded_file_url1,videopath2='--',
-                )
-                video_details2.save()
-            # if request.FILES['file3']:
-            #     video_details2 = TbVideo(videoid=new_id,videopath=uploaded_file_url,
-            #     previousvideoid=0,videopath1=uploaded_file_url1,videopath2=uploaded_file_url2,
-            #     )
-            #     video_details2.save()
-        except:
-            print('some value is missing')
-        
-    a=id
-    username=Profile.objects.get(userid = id)
-    userroleid = username.userroleid
-    print(userroleid)
-    userrolename=TbUserrole.objects.get(userroleid = userroleid)
-    userrolename=userrolename.userrolename
-    print(userrolename)
-    getdetails="yes"
-
-    url=uploaded_file_url
-    creative='Video'
-
-
-    return render(request,'tc_DigitalMarketing/upload-page.html',{'k':a,'userrolename':userrolename,
-                                                                        'id':id,'getdetails':getdetails,
-                                                                        'url':url,'creative':creative})
-
-
-    return HttpResponse("Uploaded")
-
-# def daccess(request):
-#     if request.method == "POST":
-            
-#             id="c8294fff-4ae9-41be-b914-6569105e83e6"
-#             status= TbStatus.objects.get(videoid=id)
-#             downloader_list=(status.downloader)
-#             downloader_rm_list=(status.downloadaccessremove)
-#             import ast
-#             downloader_list = ast.literal_eval(downloader_list)
-#             downloader_rm_list = ast.literal_eval(downloader_rm_list)
-
-#             downloaders_add = request.POST.getlist('topics[]')
-#             downloaders_remove = request.POST.getlist('top[]')
-#             print(downloaders_add)
-#             print()
-#             status.downloader=downloaders_remove
-#             status.downloadaccessremove=downloaders_add
-#             status.save()
-
-#             return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list ,"b_list":downloader_rm_list})
-
-
-#             return redirect('/dm/daccess')
-
-
-
-
-# # waiting for review
-#             # user=TbUser.objects.filter(userroleid='D1')
-#             # downloader=[]
-#             # for i in user:
-#             #     downloader.append(i.username)
-
-#             # id="d9e56a8d-1c64-4ed1-aaec-e63a2382ffe7"
-#             # status= TbStatus.objects.get(videoid=id)
-#             # b=(status.downloader)
-#             # import ast
-#             # res = ast.literal_eval(b)
-#             # testb = res
-#             # type(testb)
-#             # b = res
-#             # print(b)
-#             # a=downloader
-#             # remove_common(a, b)
-#             # # for value in user:
-#             # #     b=request.POST.get('downloader'+str(value.userid))
-#             # #     listofdownloader.append(b)
-#             # # print(listofdownloader)
-
-#             # downloaders_add = request.POST.getlist('topics[]')
-#             # downloaders_remove = request.POST.getlist('top[]')
-#             # # remove_common1(downloaders_add,downloaders_remove)
-
-
-#             # remove=common_member(downloaders_remove,b)
-#             # print(remove)
-#             # list3 = a + remove
-#             # print(list3)
-
-
-#             # print("downloader_add:",downloaders_add)
-#             # print("downloader_remove:",downloaders_remove)
-#             # id="d9e56a8d-1c64-4ed1-aaec-e63a2382ffe7"
-#             # status= TbStatus.objects.get(videoid=id)
-#             # status.downloadaccess='download'
-#             # status.downloader=list3
-#             # status.downloadaccessremove=remove
-#             # status.save()
-#             # return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_rm_list ,"b_list":downloader_list})
-
-#     else:
-#         downloaders=TbUser.objects.filter(userroleid='D1')
-#         print(downloaders)
-#         downloader=[]
-#         for i in downloaders:
-#             downloader.append(i.username)
-#         id="c8294fff-4ae9-41be-b914-6569105e83e6"
-#         status= TbStatus.objects.get(videoid=id)
-#         print(downloader)
-#         if status.downloader ==None or status.downloader =='[]':
-#             print(downloader)
-#             status.downloader=downloader
-#             status.downloadaccessremove='[]'
-#             status.save() #[A1,A2,A3]
-
-#         downloader_list=(status.downloader)
-#         downloader_rm_list=(status.downloadaccessremove)
-#         import ast
-#         downloader_list = ast.literal_eval(downloader_list)
-#         downloader_rm_list = ast.literal_eval(downloader_rm_list)
-        
-#         return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list ,"b_list":downloader_rm_list})
-
-    # return render (request,'tc_DigitalMarketing/daccess.html',{'user':user,"a_list": list3,"b_list": testb,})
 
 def remove_common(a, b):
  
@@ -2662,15 +2148,5 @@ def daccess(request,id):
                 downloaderaccess_list=[]
 
             return render (request,'tc_DigitalMarketing/daccess.html',{"a_list":downloader_list,"b_list":downloaderaccess_list })
-
-
-
-
-
-
-
-
-
-
 
 

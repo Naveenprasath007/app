@@ -23,10 +23,8 @@ urlpatterns = [
     path("uploaderdashboard/<str:id>", views.uploaderdashboard),
     path("filterpage/<str:id>/<str:id1>/<str:id2>", views.filterpage),
     path("myvideos/<str:id>", views.myvideos),
-    path("UserIndexpage", views.user_indexpage),
     path("approver/<str:id>", views.approver),
     path("approverview/<str:id>/<str:uid>", views.approver_view),
-    # path("status/<str:id1>", views.status),
     path("statusview/<str:id1>/<str:uid>", views.status_view),
     path("Download/<str:id>", views.download),
     path("Downloadvideo/<str:id>", views.download_video),
@@ -40,7 +38,6 @@ urlpatterns = [
     path("superadmindetail_view/<str:id>", views.superadmindetail_view), 
     path("superadmindetail_downloader_view/<str:id>", views.superadmindetail_downloader_view), 
     path('Activation/<str:id>',views.activate),
-    path("ajax_file_upload_save/<str:id>",views.ajax_file_upload_save),
     path("daccess/<str:id>",views.daccess),
     
     
@@ -53,6 +50,6 @@ urlpatterns = [
     # Login
     path('login/', views.login_view, name="login"),
     path('register/', views.register_view, name="register"),
-    path('logout/', views.logout_view,  name="logout") 
+    path('logout/', views.logout_view,  name="logout") ,
 ]
 
