@@ -30,109 +30,7 @@ today = date.today()
 today=today.strftime("%b_%d_%Y")
 
 
-@login_required(login_url='/')
-def uploaderdashboard(request,id):
-    try:
-        if request.method == "POST":
-            return render(request,'tc_DigitalMarketing/dash_index.html',{})
-        userName=connection.cursor()
-        userName.execute("select UserName from tb_User where UserID='{val}'".format(val=id))
-        userName=userName.fetchall()
-        UN=userName[0][0]
-        status=TbStatus.objects.filter(userid=id).order_by('-createddate').values()
-        recent=TbStatus.objects.filter(userid=id,status="Rejected").order_by('-createddate').values()[:3]
-        q = status.values()
-        df = pd.DataFrame.from_records(q)
-        if len(df) == 0:
-            val=id
-            return redirect('/dm/uploadfile/'+str(val))
-        filter1 =df["status"].isin(['Pending'])
-        Pending = df[filter1]
-        Pending =len(Pending)
-        filter2 =df["status"].isin(['Rejected'])
-        Rejected = df[filter2]
-        Rejected =len(Rejected)
-        filter3 =df["status"].isin(['Approved'])
-        Approved = df[filter3]
-        Approved =len(Approved)
-        filter4 =df["creative"].isin(['image','GIF'])
-        upload_img_gif = df[filter4]
-        upload_img_gif_count =len(upload_img_gif)
 
-        #  = pd.to_datetime(df['createddate'])
-        df['createddate']=df['createddate'].astype(str)
-        print(df['createddate'])
-        df['createddate']=df['createddate'].str.slice(0, -10)
-        video_count = df.groupby('createddate')['videoname'].count().reset_index()
-        DateValue=video_count['createddate'].values.tolist()
-        videoC=video_count['videoname'].values.tolist()
-
-        print(DateValue)
-
-        file_type_counts = df['creative'].value_counts().reset_index()
-        file_type_counts.columns = ['File_Type', 'Count']
-        File_Type=file_type_counts['File_Type'].values.tolist()
-        File_TypeC=file_type_counts['Count'].values.tolist()
-        userdetails=Profile.objects.get(userid = id)
-        admin_approver = Profile.objects.filter(userroleid='S1') | Profile.objects.filter(userroleid='R1') 
-        
-        return render(request,'tc_DigitalMarketing/dash_index.html',{'id':id,'status':status,'Approved':Approved,'Rejected':Rejected,'Pending':Pending,'UserName':UN,
-                                                                     'DateValue':DateValue,"videoC":videoC,'upload_img_gif_count':upload_img_gif_count,'File_Type':File_Type,
-                                                                     'File_TypeC':File_TypeC,'recent':recent,'admin_approver':admin_approver,'userdetails':userdetails
-                                                                     })
-    except Exception as e:
-        error={'error':e}
-        return render(request,'tc_DigitalMarketing/error.html',context=error)  
-    
-@login_required(login_url='/')
-def filterpage(request,id,id1,id2):
-    try:
-        if request.method == "POST":
-             return render(request,'tc_DigitalMarketing/filterpage.html',{'id':id,'status':status,})
-        
-        user_status=""
-        status=""
-        videodetails=""
-        if id2 == 'User':
-            status=TbStatus.objects.filter(userid=id,status=id1).order_by('-createddate').values()
-
-        elif id2 == 'Apporver':
-            userName=connection.cursor()
-            userName.execute("select UserName from tb_User where UserID='{val}';".format(val=id))
-            userName=userName.fetchall()
-            UN=userName[0][0]
-            user_status=TbStatus.objects.filter(approver=UN,status=id1).order_by('-createddate').values()
-        
-        elif id1 == 'Pending': 
-            user_status=TbStatus.objects.filter(status=id1).order_by('-createddate').values()
-
-        username=Profile.objects.get(userid = id)
-        userroleid = username.userroleid
-        print(userroleid)
-        userrolename=TbUserrole.objects.get(userroleid = userroleid)
-        userrolename=userrolename.userrolename
-        print(userrolename)
-        userdetails=Profile.objects.get(userid = id)
-        return render(request,'tc_DigitalMarketing/filterpage.html',{'id':id,'status':status,
-                                                                     'user_status':user_status
-                                                                     ,'userrolename':userrolename,
-                                                                     'userdetails':userdetails})
-    except Exception as e:
-        error={'error':e}
-        return render(request,'tc_DigitalMarketing/error.html',context=error)  
-    
-@login_required(login_url='/')
-def myvideos(request,id):
-    try:
-        if request.method == "POST":
-             return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id})
-        videodetails=video_Details.objects.filter(userid=id)
-        userdetails=Profile.objects.get(userid = id)
-        return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id,'videodetails':videodetails,
-                                                                   'userdetails':userdetails})
-    except Exception as e:
-        error={'error':e}
-        return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 @login_required(login_url='/')
 def uploadfile(request,id):
@@ -326,17 +224,6 @@ def creater_upload(request,id,fname,type,vid):
                         video_url =folder+fname
                         image_url = '--'
                         Gif_url = '--'
-                        print(video_url)
-                        # tbvideo = TbVideo.objects.get(videoid=VID)
-                        # tbvideo.videoname='download'
-                        # tbvideo.videotranscription=text
-                        # tbvideo.creative=Creative
-                        # tbvideo.platform=Platform
-                        # tbvideo.lob=Lob
-                        # tbvideo.creater=Creator
-                        # tbvideo.save()
-
-
 
                     # if Creative != 'Video':
                         video_details2 = TbVideo(videoid=VID,videoname=Title,
@@ -606,10 +493,7 @@ def approver(request,id):
                     return render(request,'tc_DigitalMarketing/approver_index.html',{'status':status,'id':id,'status':status,'id':id,'Approved':Approved,'Rejected':Rejected,
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
                                                                                 'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,'creators':creators})
-                    # return redirect('/dm/createrupload/'+str(val))
-                # filter1 =df["status"].isin(['Pending'])
-                # Pending = df[filter1]
-                # Pending =len(Pending)
+
                 filter2 =df["status"].isin(['Rejected'])
                 Rejected = df[filter2]
                 Rejected =len(Rejected)
@@ -661,12 +545,12 @@ def approver(request,id):
 
 @login_required(login_url='/')
 def admin(request,id):
-    # try:
+    try:
         if request.method == "POST":
             return render(request,'tc_DigitalMarketing/admin_index.html')
         else:
             #this try catch i need to modify 
-            # try:
+            try:
                 userName=connection.cursor()
                 userName.execute("select UserName from tb_User where UserID='{val}';".format(val=id))
                 userName=userName.fetchall()
@@ -756,17 +640,17 @@ def admin(request,id):
                                                                                 'Pending':Pending,'UserName':UN,'DateValue':DateValue,"videoC":videoC,
                                                                                 'File_Type':File_Type,'File_TypeC':File_TypeC,'recent':recent,'userdetails':userdetails,
                                                                                 'creators':creators})
-            # except:
-            #     return redirect('/dm/Activation/'+str(id))
+            except:
+                return redirect('/dm/Activation/'+str(id))
 
-    # except Exception as e:
-    #     error={'error':e}
-    #     return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    except Exception as e:
+        error={'error':e}
+        return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 
 @login_required(login_url='/')
 def approver_view(request,id,uid):
-    # try:
+    try:
         if request.method == "POST":
                 #rechecking is pending
                 q0 = request.POST.get('q0')
@@ -1066,9 +950,9 @@ def approver_view(request,id,uid):
                                                                               'imgUrl':imgUrl,
                                                                               'gifUrl':gifUrl,
                                                                               'userrolename':userrolename,"userdetails":userdetails})
-    # except Exception as e:
-    #     error={'error':e}
-    #     return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    except Exception as e:
+        error={'error':e}
+        return render(request,'tc_DigitalMarketing/error.html',context=error)  
 
 
 
@@ -1083,12 +967,6 @@ def status_view(request,id1,uid):
             status=connection.cursor()
             status.execute("select reason,UploaderName FROM tb_Status WHERE VideoID='{value1}';".format(value1=id1))
             response=status.fetchall()
-
-            # cursor1=connection.cursor()
-            # cursor1.execute("select VideoPath,VideoName from CampaignVideo cv inner join tb_Video v on v.VideoID=cv.VideoID AND cv.CampaignVideoID='{val}'".format(val=id1))
-            # VideoDeatails=cursor1.fetchall()
-            # vP='/'+VideoDeatails[0][0]
-            # vName=VideoDeatails[0][1]
 
             video=TbVideo.objects.get(videoid = id1)
             vP=video.videopath
@@ -1139,6 +1017,113 @@ def status_view(request,id1,uid):
     except Exception as e:
         error={'error':e}
         return render(request,'tc_DigitalMarketing/error.html',context=error)  
+
+
+@login_required(login_url='/')
+def uploaderdashboard(request,id):
+    try:
+        if request.method == "POST":
+            return render(request,'tc_DigitalMarketing/dash_index.html',{})
+        userName=connection.cursor()
+        userName.execute("select UserName from tb_User where UserID='{val}'".format(val=id))
+        userName=userName.fetchall()
+        UN=userName[0][0]
+        status=TbStatus.objects.filter(userid=id).order_by('-createddate').values()
+        recent=TbStatus.objects.filter(userid=id,status="Rejected").order_by('-createddate').values()[:3]
+        q = status.values()
+        df = pd.DataFrame.from_records(q)
+        if len(df) == 0:
+            val=id
+            return redirect('/dm/uploadfile/'+str(val))
+        filter1 =df["status"].isin(['Pending'])
+        Pending = df[filter1]
+        Pending =len(Pending)
+        filter2 =df["status"].isin(['Rejected'])
+        Rejected = df[filter2]
+        Rejected =len(Rejected)
+        filter3 =df["status"].isin(['Approved'])
+        Approved = df[filter3]
+        Approved =len(Approved)
+        filter4 =df["creative"].isin(['image','GIF'])
+        upload_img_gif = df[filter4]
+        upload_img_gif_count =len(upload_img_gif)
+
+        #  = pd.to_datetime(df['createddate'])
+        df['createddate']=df['createddate'].astype(str)
+        print(df['createddate'])
+        df['createddate']=df['createddate'].str.slice(0, -10)
+        video_count = df.groupby('createddate')['videoname'].count().reset_index()
+        DateValue=video_count['createddate'].values.tolist()
+        videoC=video_count['videoname'].values.tolist()
+
+        print(DateValue)
+
+        file_type_counts = df['creative'].value_counts().reset_index()
+        file_type_counts.columns = ['File_Type', 'Count']
+        File_Type=file_type_counts['File_Type'].values.tolist()
+        File_TypeC=file_type_counts['Count'].values.tolist()
+        userdetails=Profile.objects.get(userid = id)
+        admin_approver = Profile.objects.filter(userroleid='S1') | Profile.objects.filter(userroleid='R1') 
+        
+        return render(request,'tc_DigitalMarketing/dash_index.html',{'id':id,'status':status,'Approved':Approved,'Rejected':Rejected,'Pending':Pending,'UserName':UN,
+                                                                     'DateValue':DateValue,"videoC":videoC,'upload_img_gif_count':upload_img_gif_count,'File_Type':File_Type,
+                                                                     'File_TypeC':File_TypeC,'recent':recent,'admin_approver':admin_approver,'userdetails':userdetails
+                                                                     })
+    except Exception as e:
+        error={'error':e}
+        return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    
+@login_required(login_url='/')
+def filterpage(request,id,id1,id2):
+    try:
+        if request.method == "POST":
+             return render(request,'tc_DigitalMarketing/filterpage.html',{'id':id,'status':status,})
+        
+        user_status=""
+        status=""
+        videodetails=""
+        if id2 == 'User':
+            status=TbStatus.objects.filter(userid=id,status=id1).order_by('-createddate').values()
+
+        elif id2 == 'Apporver':
+            userName=connection.cursor()
+            userName.execute("select UserName from tb_User where UserID='{val}';".format(val=id))
+            userName=userName.fetchall()
+            UN=userName[0][0]
+            user_status=TbStatus.objects.filter(approver=UN,status=id1).order_by('-createddate').values()
+        
+        elif id1 == 'Pending': 
+            user_status=TbStatus.objects.filter(status=id1).order_by('-createddate').values()
+
+        username=Profile.objects.get(userid = id)
+        userroleid = username.userroleid
+        print(userroleid)
+        userrolename=TbUserrole.objects.get(userroleid = userroleid)
+        userrolename=userrolename.userrolename
+        print(userrolename)
+        userdetails=Profile.objects.get(userid = id)
+        return render(request,'tc_DigitalMarketing/filterpage.html',{'id':id,'status':status,
+                                                                     'user_status':user_status
+                                                                     ,'userrolename':userrolename,
+                                                                     'userdetails':userdetails})
+    except Exception as e:
+        error={'error':e}
+        return render(request,'tc_DigitalMarketing/error.html',context=error)  
+    
+@login_required(login_url='/')
+def myvideos(request,id):
+    try:
+        if request.method == "POST":
+             return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id})
+        videodetails=video_Details.objects.filter(userid=id)
+        userdetails=Profile.objects.get(userid = id)
+        return render(request,'tc_DigitalMarketing/myvideos.html',{'id':id,'videodetails':videodetails,
+                                                                   'userdetails':userdetails})
+    except Exception as e:
+        error={'error':e}
+        return render(request,'tc_DigitalMarketing/error.html',context=error)  
+
+
 
 @login_required(login_url='/')
 def download_view(request,id,id1):
@@ -1252,31 +1237,7 @@ def delete_video(request,id,id1):
         messages.error(request, 'Video Details Deleted succesfully')
         return redirect('/dm/createrupload/'+str(id1))
 
-# def upload_again(request,id,id1):
-#     if request.method == "POST":
-#         myfile = request.FILES['myfile']
-#         fs = FileSystemStorage()
-#         filename = fs.save(myfile.name, myfile)
-#         uploaded_file_url = fs.url(filename)
-#         print(uploaded_file_url)
-#         url=uploaded_file_url
-#         url1=url[1:]
-
-#         text='--'
-
-#         record = TbVideo.objects.get(videoid=id)
-#         record.videopath1 = uploaded_file_url
-#         record.videotranscription1 = text
-#         record.save()
-#         videoDetails = video_Details(userid=TbUser.objects.get(userid=id1),VideoPath=uploaded_file_url)
-#         videoDetails.save()
-#         messages.success(request, 'submitted succesfully')
-#         return render(request,'tc_DigitalMarketing/uploadagain.html',{"video":url,'text':text,'id':id1})
-#     else:
-#         status='Waiting'
-#         videodetails=video_Details.objects.filter(userid=id1)
-#         return render(request,'tc_DigitalMarketing/uploadagainnew.html',{'videodetails':videodetails,'status':status})
-    
+   
 
 @login_required(login_url='/')
 def upload_again(request,id,id1):
@@ -1393,23 +1354,6 @@ def login_view(request):
             password = form.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
             login(request, user)
-            # if next:
-            #customized redirect i need to check this
-            #     return redirect(next)
-                # if user.profile.userroleid == "U1":
-                        
-                #         return redirect('/dm/uploaderdashboard/'+str(user.profile.userid)) 
-                # if user.profile.userroleid == "R1":
-
-                #         return redirect('/dm/approver/'+str(user.profile.userid))   
-                        
-                # if user.profile.userroleid == "S1":
-
-                #         return redirect('/dm/superadmin/'+str(user.profile.userid))  
-                
-                # if user.profile.userroleid == "D1": 
-                
-                #         return redirect('/dm/superadmin/'+str(user.profile.userid)) 
             if user.profile.userroleid == "U1":
                 
                 return redirect('/dm/uploaderdashboard/'+str(user.profile.userid)) 
