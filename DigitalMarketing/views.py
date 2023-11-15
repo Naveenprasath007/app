@@ -54,7 +54,7 @@ def uploadfile(request,id):
 
             file = fs.save(myfile.name.replace(" ", ""), myfile)
             url = fs.url(file)
-            filename=myfile
+            filename=file
             VID = uuid.uuid4()
             VID=str(VID)
             return redirect('/dm/createrupload/'+id+'/'+str(filename)+'/'+type+'/'+VID)
