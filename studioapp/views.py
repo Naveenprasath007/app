@@ -34,14 +34,3 @@ def scriptgenerate(input):
 
 
 
-# client = OpenAI(
-# api_key="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",
-# )
-
-# stream = client.chat.completions.create(
-#     model="gpt-3.5-turbo",
-#     messages=[{"role": "user", "content": input}],
-#     stream=True,
-# )
-# for part in stream:
-#     print(part.choices[0].delta.content or "")
