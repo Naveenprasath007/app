@@ -709,7 +709,7 @@ def approver_view(request,id,uid):
                     UN=userName[0][0]
                     
                     approve = TbApprove(userid=TbUser.objects.get(userid=uid),
-                                        videoid=id,videotitle=vN,videopath=vP,uploadername=UN)
+                                        videoid=id,videotitle=vN,videopath=vP,videopath1=vP1,uploadername=UN)
                     approve.save()
 
                     Question = TbapproverQuestion.objects.all()
@@ -1191,10 +1191,8 @@ def download(request,id):
 
 
 def download_video(request,id):
-        cursor1=connection.cursor()
-        cursor1.execute("select VideoPath,VideoTranscription,VideoName from CampaignVideo cv inner join tb_Video v on v.VideoID=cv.VideoID AND cv.CampaignVideoID='{val}'".format(val=id))
-        VideoDeatails=cursor1.fetchall()
-        vP='/'+VideoDeatails[0][0]
+        video=TbVideo.objects.get(videoid = id)
+        vP=video.videopath
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         file_path = BASE_DIR+vP
         with open(file_path,'rb')as fh:
