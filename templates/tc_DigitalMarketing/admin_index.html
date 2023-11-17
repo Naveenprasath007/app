@@ -198,14 +198,14 @@
                                 </button>
                                 </a>
                            </div>
-                           <div class="white-box tasks-holder">
+                           <div class="white-box tasks-holder" style="overflow-y: scroll; height: 300px;">
                             <h4>Recent</h4>
-                            <table class="table table-stripped">
-                            <tbody>
+                            <table class="table table-stripped" style="overflow-y: scroll; height: 100px;">
+                            <tbody style="overflow-y: scroll; height: 100px;">
                             {% for i in recent %}
                             <tr>
                             <div class="alert-lists mt-2">
-                                    <td>
+                                    <td style="word-break: break-all;  overflow-y: auto;">
                                         <div class="info-list success">
                                         <i class="bi bi-play-circle"></i>
                                         {{i.videoname}}
