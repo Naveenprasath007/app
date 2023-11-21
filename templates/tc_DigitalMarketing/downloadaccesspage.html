@@ -2,6 +2,23 @@
 {% load static %}
 
 {% block content %}
+<style>
+  [data-initials]:before {
+  background: #099bdd;
+  color: white;
+  opacity: 1; 
+  content: attr(data-initials); 
+  display: inline-block; 
+  font-weight: bold; 
+  border-radius: 50%; 
+  vertical-align: middle; 
+  margin-right: 0.5em; 
+  width: 50px; 
+  height: 50px; 
+  line-height: 50px; 
+  text-align: center; 
+  }
+  </style>
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
     <a class="navbar-brand d-inline-flex align-items-center" href="/dm/superadmin/{{ id }}">
@@ -38,7 +55,7 @@
           <a class="nav-link" href="#">
             <span>My Account</span>
             <span class="av-holder">
-              <img src="{% static 'images/avatar.png'%}" alt="" />
+              <span data-initials="{{userdetails.username.0|title}}"></span>
               <i class="bi bi-chevron-down"></i>
             </span>
           </a>
@@ -103,8 +120,33 @@
           <td>
             <p class="fw-normal mb-1"> {{i.videoname}} </p>
           </td>
-          <td>
+          <!-- <td>
             <p class="fw-normal mb-1"> {{i.platform}} </p>
+          </td> -->
+          <td style="position: relative; text-align: center;">
+          
+            {% if 'Youtube' in i.platform %}
+            <img src="{% static 'images/youtubeicon.svg' %}">
+            {% endif %}
+    
+            {% if 'Facebook' in i.platform %}
+            <img src="{% static 'images/facebookicon.svg' %}">
+            {% endif %}
+            
+            {% if 'GDN' in i.platform %}
+            <img src="{% static 'images/google.svg' %}" >
+            {% endif %}
+
+            {% if 'tiktok' in i.platform %}
+            <img src="{% static 'images/tik-tokicon.svg' %}" >
+            {% endif %} 
+            
+            {% if 'Native' in i.platform %}
+            <img src="{% static 'images/gear.svg' %}" >
+            {% endif %}
+          </td>
+          <td style="display:none;">
+            <p class="fw-normal mb-1"> {{i.platform}} </p> 
           </td>
           <td>
             <p class="fw-normal mb-1"> {{i.uploadername}} </p>
@@ -184,9 +226,35 @@
           <td>
             <p class="fw-normal mb-1"> {{i.videoname}} </p>
           </td>
-          <td>
+          <!-- <td>
             <p class="fw-normal mb-1"> {{i.platform}} </p>
+          </td> -->
+          <td style="position: relative; text-align: center;">
+          
+            {% if 'Youtube' in i.platform %}
+            <img src="{% static 'images/youtubeicon.svg' %}">
+            {% endif %}
+    
+            {% if 'Facebook' in i.platform %}
+            <img src="{% static 'images/facebookicon.svg' %}">
+            {% endif %}
+            
+            {% if 'GDN' in i.platform %}
+            <img src="{% static 'images/google.svg' %}" >
+            {% endif %}
+
+            {% if 'tiktok' in i.platform %}
+            <img src="{% static 'images/tik-tokicon.svg' %}" >
+            {% endif %} 
+            
+            {% if 'Native' in i.platform %}
+            <img src="{% static 'images/gear.svg' %}" >
+            {% endif %}
           </td>
+          <td style="display:none;">
+            <p class="fw-normal mb-1"> {{i.platform}} </p> 
+          </td>
+
           <td>
             <p class="fw-normal mb-1"> {{i.uploadername}} </p>
           </td>

@@ -478,7 +478,7 @@ def approver(request,id):
 
 
                     df['createddate']=df['createddate'].astype(str)
-                    df['createddate']=df['createddate'].str.slice(0, -10)
+                    df['createddate']=df['createddate'].str.slice(0, -15)
                     video_count = df.groupby('createddate')['videoname'].count().reset_index()
                     DateValue=video_count['createddate'].values.tolist()
                     videoC=video_count['videoname'].values.tolist()
@@ -515,7 +515,7 @@ def approver(request,id):
 
 
                 df['createddate']=df['createddate'].astype(str)
-                df['createddate']=df['createddate'].str.slice(0, -10)
+                df['createddate']=df['createddate'].str.slice(0, -15)
                 video_count = df.groupby('createddate')['videoname'].count().reset_index()
                 DateValue=video_count['createddate'].values.tolist()
                 videoC=video_count['videoname'].values.tolist()
@@ -580,7 +580,8 @@ def admin(request,id):
 
 
                     df['createddate']=df['createddate'].astype(str)
-                    df['createddate']=df['createddate'].str.slice(0, -10)
+                    df['createddate']=df['createddate'].str.slice(0, -15)
+                    print(df['createddate'])
                     video_count = df.groupby('createddate')['videoname'].count().reset_index()
                     DateValue=video_count['createddate'].values.tolist()
                     videoC=video_count['videoname'].values.tolist()
@@ -620,7 +621,7 @@ def admin(request,id):
 
 
                 df['createddate']=df['createddate'].astype(str)
-                df['createddate']=df['createddate'].str.slice(0, -10)
+                df['createddate']=df['createddate'].str.slice(0, -15)
                 print(df['createddate'])
                 video_count = df.groupby('createddate')['videoname'].count().reset_index()
                 DateValue=video_count['createddate'].values.tolist()
@@ -1029,7 +1030,7 @@ def uploaderdashboard(request,id):
         userName=userName.fetchall()
         UN=userName[0][0]
         status=TbStatus.objects.filter(userid=id).order_by('-createddate').values()
-        recent=TbStatus.objects.filter(userid=id,status="Rejected").order_by('-createddate').values()[:3]
+        recent=TbStatus.objects.filter(userid=id).order_by('-createddate').values()[:3]
         q = status.values()
         df = pd.DataFrame.from_records(q)
         if len(df) == 0:
@@ -1050,13 +1051,14 @@ def uploaderdashboard(request,id):
 
         #  = pd.to_datetime(df['createddate'])
         df['createddate']=df['createddate'].astype(str)
+        # print(df['createddate'])
+        df['createddate']=df['createddate'].str.slice(0, -15)
         print(df['createddate'])
-        df['createddate']=df['createddate'].str.slice(0, -10)
         video_count = df.groupby('createddate')['videoname'].count().reset_index()
         DateValue=video_count['createddate'].values.tolist()
         videoC=video_count['videoname'].values.tolist()
 
-        print(DateValue)
+        print(video_count)
 
         file_type_counts = df['creative'].value_counts().reset_index()
         file_type_counts.columns = ['File_Type', 'Count']
